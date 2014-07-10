@@ -1,0 +1,34 @@
+Nom:
+- mikado graph
+- BomberGraph est peut être plus explicite, car on comprend tout de suite que les points ne doivent pas se toucher, mais d'un autre côté, ce nom est un petit peu violent/bourrin, et peut décourager les gens qui cherchent juste un jeu de casse tête
+
+Gameplay:
+- faire en sorte que certains noeuds soient fixes, pour les différencier, utiliser une couleur différente. Encore mieux: faire des noeuds qui se déplacent tout seul, selon un chemin prédéfini
+- temps limité pour la résolution de chaque niveau: les points augmentent de taille, ce qui augmente la chance qu'ils se touchent 
+
+Menu:
+- présentation des icones des niveaux comme dans Angry Birds
+  quand on clique sur l'icone d'un niveau, ça l'affiche en tant que fond d'écran + popup
+  pour vraiment jouer le niveau, dire oui dans la popup
+
+Graphismes
+- pour l'icone du jeu: utiliser simplement l'image d'une mine ? (en attendant de trouver mieux)
+- quand deux noeuds se touchent -> ils explosent,
+  et faire en sorte qu'une étincelle se propage le long des ressorts
+  et fassent exploser les autres noeuds petits à petits -> inutile donc indispensable !
+- faire une fonction pour afficher le ressort avec /\/\/\ plutôt qu'un trait,
+  comme ça les gens comprendront plus vite le principe physique
+  donc ajouter une variable qui caractérise le nombre de /\ par rapport à la distance dans chaque objet Link 
+
+
+
+------------------
+Infos pour le code:
+
+voir dernière sous partie de la partie 2 pour voir comment tracer des images sur l'écran
+voir p380 "Le Canvas du SurfaceView..."
+
+p382: Pour effectuer les dessins, on va utiliser un SurfaceView, puisqu'il s'agit de la manière la plus facile de dessiner avec de bonnes performances. Ensuite, chaque élément devra être dessiné sur le Canvas du SurfaceView.
+
+p386: L'appareil est bloqué en mode paysage (<activity android:configChanges="orientation"
+android:screenOrientation="landscape" >)
