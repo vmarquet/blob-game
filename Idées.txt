@@ -19,6 +19,7 @@ Graphismes
 - faire une fonction pour afficher le ressort avec /\/\/\ plutôt qu'un trait,
   comme ça les gens comprendront plus vite le principe physique
   donc ajouter une variable qui caractérise le nombre de /\ par rapport à la distance dans chaque objet Link 
+  ou mieux: utiliser une image, et il suffit de la compresser ou de l'étirer
 
 
 
