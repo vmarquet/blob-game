@@ -1,0 +1,22 @@
+Conventions pour les fichiers décrivant les graphes:
+
+- le nombre de noeuds doit être indiqué sur la première ligne du fichier
+  les noeuds seront numérotés automatiquement, en commençant à 0
+
+- les liens entre deux noeuds doivent être au format suivant:
+  L START_NOTE_NUMBER END_NODE_NUMBER
+  (START_NODE_NUMBER et END_NODE_NUMBER doivent être des entiers)
+
+- les positions de départ des noeuds (optionnel) doivent être au format suivant:
+  N NODE_NUMBER POSITION_X POSITION_Y
+  (POSITION_X et POSITION_Y doivent être des float entre 0 et 1)
+
+- possibilité de mettre des commentaires, pour cela la ligne doit commencer par '#'
+
+
+Si une ligne n'est pas conforme aux conventions, ou est incohérente avec les paramètres déjà entrés (exemple: numéro de noeud supérieur au nombre maximum de noeud), la ligne sera simplement inglorée.
+
+
+TODO:
+- pouvoir préciser la masse d'un noeud / la constante de raideur d'un lien
+
