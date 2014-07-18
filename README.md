@@ -1,11 +1,12 @@
 TODO
 ----
-* Comprendre comment gérer les panneaux ("activités") sous Android
-* Faire le code pour couper un ressort:
-    * Récupérer les déplacements du doigt de l'utilisateur sur l'écran -> segment
-    * Algo de détection de croisement de segments pour savoir quel ressort il a coupé
-* Faire un niveau "proof of concept" pour voir si ça tient la route (niveau jouabilité)
+* améliorer la simulation (cf [ici](http://g.ivank.net/)): faire des sliders, régler les coefficients -> Michel
+* ajouter la possibilité de récupérer les clics de la souris -> Vincent
+    * clic gauche: déplacer un noeud
+    * clic droit: fixer un noeud
+* faire un niveau proof of concept dans un JPanel, avec quelques obstacles
 
 LIENS
 -----
-Pour stocker les graphismes: [Google Drive](https://drive.google.com/folderview?id=0B31-CIvNW1LdbFRrSVV5ZmVlVWs&usp=sharing) (ne pas les commiter, sauf si c'est la version finale, car ça prend beaucoup de place).
+* Pour stocker les graphismes: [Google Drive](https://drive.google.com/folderview?id=0B31-CIvNW1LdbFRrSVV5ZmVlVWs&usp=sharing) (ne pas les commiter, sauf si c'est la version finale, car ça prend beaucoup de place)
+* [simulation physique pour s'inspirer](http://g.ivank.net/)
