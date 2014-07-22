@@ -47,10 +47,15 @@ public class Link {
 	public Node getEndNode() {
 		return this.node_end;
 	}
+	public double getLength() {
+		return this.length;
+	}
+	public double getRigidity() {
+		return this.rigidity;
+	}
 	public Color getColor() {
 		return this.color;
 	}
-	
 
 	// pour les forces qui s'appliquent d'un noeud sur l'autre
 	public void applyForceBetweenNodes(double f) {
