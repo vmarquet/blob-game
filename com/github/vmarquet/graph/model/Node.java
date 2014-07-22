@@ -54,6 +54,9 @@ public class Node {
 	public static void resetTotalNodeNumber() {
 		totalNodeNumber = 0;
 	}
+	public void setMass(double newMass) {
+		this.mass = newMass;
+	}
 
 	// getters:
 	public int getNodeNumber() {
