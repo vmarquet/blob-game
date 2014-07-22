@@ -118,6 +118,8 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 
 				// Position: v = dx/dt => dx = v*dt
 				for (Node node : model.getNodes()) {
+					if (node.isHung() == true || node.isGrabbed() == true)
+						continue;
 					node.pos_x += node.vit_x*(this.timeStep/1000.0);
 					node.pos_y += node.vit_y*(this.timeStep/1000.0);
 				}
@@ -126,27 +128,27 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 				// on fait en sorte que son barycentre soit toujours au milieu de la fenêtre
 
 				// on calcule le barycentre des points
-				double moyenne_x = 0;
-				double moyenne_y = 0;
-				for (Node node : model.getNodes()) {
-					moyenne_x += node.pos_x;
-					moyenne_y += node.pos_y;
-				}
-				int n = model.getNumberOfNodes();
-				if (n != 0) {
-					moyenne_x /= n;
-					moyenne_y /= n;
-				}
+				// double moyenne_x = 0;
+				// double moyenne_y = 0;
+				// for (Node node : model.getNodes()) {
+				// 	moyenne_x += node.pos_x;
+				// 	moyenne_y += node.pos_y;
+				// }
+				// int n = model.getNumberOfNodes();
+				// if (n != 0) {
+				// 	moyenne_x /= n;
+				// 	moyenne_y /= n;
+				// }
 
 				// on calcule l'écart par rapport au centre de la fenêtre
-				double ecart_x = 0.5 - moyenne_x;
-				double ecart_y = 0.5 - moyenne_y;
+				// double ecart_x = 0.5 - moyenne_x;
+				// double ecart_y = 0.5 - moyenne_y;
 
 				// on déplace tous les noeuds
-				for (Node node : model.getNodes()) {
-					node.pos_x += ecart_x;
-					node.pos_y += ecart_y;
-				}
+				// for (Node node : model.getNodes()) {
+				// 	node.pos_x += ecart_x;
+				// 	node.pos_y += ecart_y;
+				// }
 
 				// DEBUG:
 				// for (Node node : model.getNodes()) {

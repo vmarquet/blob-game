@@ -14,9 +14,11 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.util.Hashtable;
+import java.awt.event.MouseListener;
+import java.awt.Point;
 
 
-public class SimulationViewJPanel extends JPanel implements SimulationView {
+public class SimulationViewJPanel extends JPanel implements SimulationView, MouseListener {
 
       
     private SimulationModel model = null;
@@ -25,6 +27,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView {
 	private double margin_y;
 	private double min_size;
 
+	private Node grabbedNode = null; // link to the node that is grabbed with the mouse
 
 	public SimulationViewJPanel() {
 		
@@ -122,10 +125,14 @@ public class SimulationViewJPanel extends JPanel implements SimulationView {
 		
 		// on récupère l'instance du modèle (pattern singleton)
 		this.model = SimulationModel.getInstance();
+
+		// pour récupérer les mouvements de la souris:
+		addMouseListener(this);
 	}
 
 	public void updateDisplay() {
 		this.updateUI();
+		this.setGrabbedNodePosition();
 	}
 	@Override
 	public void paintComponent(Graphics g) {
@@ -134,7 +141,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView {
 		// on caste l'objet Graphics en Graphics2D car plus de fonctionnalités
 		Graphics2D g2d = (Graphics2D) g;
 		// si on veut de l'antialiasing (ATTENTION ça fait ramer un max quand beaucoupd de noeuds)
-		// g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		// we clear the background
 		Color backgroundColor = Color.decode("#000000");
@@ -150,7 +157,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView {
 	private void paintNodes(Graphics2D g) {
 		for (Node node : model.getNodes()) {
 			Color color = node.getColor();
-			double diameter = min_size*node.getDiameter();
+			double diameter = convertNodeDiameterToPixel(node);
 			// we draw the circle:
 			g.setColor(color);
 			g.fillOval((int)(convertNodePositionToPixelX(node)-diameter/2), 
@@ -221,5 +228,96 @@ public class SimulationViewJPanel extends JPanel implements SimulationView {
 	private double convertPixelToNodePositionY(int y) {
 		double y_f = (double)y;
 		return (y_f-margin_y)/min_size;
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// on récupère la position du click, en pixels (relatif au panel)
+		int x = e.getX();
+		int y = e.getY();
+
+		// on récupère le bouton qui a cliqué (1 = gauche, 2 = milieu, 3 = droit)
+		int buttonClicked = e.getButton();
+		if(buttonClicked == MouseEvent.BUTTON3) { // clic droit
+
+			// on parcourt tous les noeuds pour trouver celui sur lequel on a cliqué
+			for (Node node : model.getNodes()) {
+				double X = convertNodePositionToPixelX(node);
+				double Y = convertNodePositionToPixelY(node);
+				double gap_x = X - x;
+				double gap_y = Y - y;
+				double distance = Math.sqrt(gap_x*gap_x + gap_y*gap_y);
+				if (distance <= convertNodeDiameterToPixel(node)/2) {
+					if (node.isHung() == false)
+						node.hang();
+					else
+						node.unhang();
+					break;
+				}
+			}
+		}
+	}
+	public void mousePressed(MouseEvent e) {
+		// on récupère la position à laquelle on a appuyé, en pixels (relatif au panel)
+		int x = e.getX();
+		int y = e.getY();
+
+		// on récupère le bouton qui a été utilisé (1 = gauche, 2 = milieu, 3 = droit)
+		int buttonPressed = e.getButton();
+		if(buttonPressed == MouseEvent.BUTTON1) {  // clic gauche
+
+			// on parcourt tous les noeuds pour trouver celui que l'on a attrapé ("grabbed")
+			for (Node node : model.getNodes()) {
+				double X = convertNodePositionToPixelX(node);
+				double Y = convertNodePositionToPixelY(node);
+				double gap_x = X - x;
+				double gap_y = Y - y;
+				double distance = Math.sqrt(gap_x*gap_x + gap_y*gap_y);
+				if (distance <= convertNodeDiameterToPixel(node)/2) {
+					// si le noeud est fixé, on ne fait rien
+					if (node.isHung() == true)
+						break;
+					node.grab();
+					this.grabbedNode = node;
+					break;
+				}
+			}
+		}
+	}
+	public void mouseReleased(MouseEvent e) {
+		// on récupère le bouton qui a été utilisé (1 = gauche, 2 = milieu, 3 = droit)
+		int buttonReleased = e.getButton();
+		if(buttonReleased == MouseEvent.BUTTON1) {  // clic gauche
+
+			// on libère le noeud qui était attrapé, s'il y en avait un
+			if (this.grabbedNode != null) {
+				this.grabbedNode.release();
+				this.grabbedNode = null;
+			}
+		}
+	}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+
+	private void setGrabbedNodePosition() {
+		if (this.grabbedNode == null) // if no node is grabbed
+			return;
+
+		// we get mouse position, and we set the node position to this position
+		// good advice here: http://stackoverflow.com/questions/1439022/get-mouse-position
+		Point pos = this.getMousePosition();
+
+		// problem: if mouse is outside the panel, the method above return null
+		// so in that case, we release the grabbed node
+		if (pos == null) {
+			this.grabbedNode.release();
+			this.grabbedNode = null;
+			return;
+		}
+
+		double x = convertPixelToNodePositionX((int)pos.getX());
+		double y = convertPixelToNodePositionY((int)pos.getY());
+		this.grabbedNode.setPosition(x,y);
+
 	}
 }

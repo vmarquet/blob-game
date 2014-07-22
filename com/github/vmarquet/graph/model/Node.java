@@ -21,7 +21,8 @@ public class Node {
 
 	private Color color = Color.WHITE;
 	private double diameter = 0.06;
-	private boolean fixed = false;  // when set to true, the node cannot move
+	private boolean hung = false;  // when set to true, the node cannot move
+	private boolean grabbed = false;  // to know if the node has been grabbed by the mouse
 
 
 	// constructors:
@@ -53,6 +54,24 @@ public class Node {
 	}
 	public static void resetTotalNodeNumber() {
 		totalNodeNumber = 0;
+	}
+	public boolean isHung() {
+		return this.hung;
+	}
+	public void hang() {
+		this.hung = true;
+	}
+	public void unhang() {
+		this.hung = false;
+	}
+	public boolean isGrabbed() {
+		return this.grabbed;
+	}
+	public void grab() {
+		this.grabbed = true;
+	}
+	public void release() {
+		this.grabbed = false;
 	}
 
 	// getters:
