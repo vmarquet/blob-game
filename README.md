@@ -1,11 +1,10 @@
 TODO
 ----
-* améliorer la simulation (cf [ici](http://g.ivank.net/)): faire des sliders, régler les coefficients -> Michel
-* ajouter la possibilité de récupérer les clics de la souris -> Vincent
-    * clic gauche: déplacer un noeud
-    * clic droit: fixer un noeud
+* gérer les graphes distinct (là, ils vont se repousser mutuellement et s'éjecter hors de l'écran) -> Michel
+    * pour une solution possible, cf [ici](https://github.com/vmarquet/graph/blob/master/C%20program%20%5Bwith%20CSFML%5D/simu.c), en résumé: pour chaque noeud, lui attribuer un n° de graph, et n'appliquer la force de répulsion qu'entre des noeud ayant le même numéro de graph
+* fusion des graphes -> Michel
+* se décider pour la manière de générer les niveaux (cf Idées.txt) -> Vincent
 * faire un niveau proof of concept dans un JPanel, avec quelques obstacles
-* permettre à deux graphes de fusionner
 
 LIENS
 -----
