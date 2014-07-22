@@ -21,6 +21,7 @@ public class Node {
 
 	private Color color = Color.WHITE;
 	private double diameter = 0.04;
+	private boolean fixed = false;  // when set to true, the node cannot move
 
 	// constructors:
 	// if node number < 0, automatic numerotation
