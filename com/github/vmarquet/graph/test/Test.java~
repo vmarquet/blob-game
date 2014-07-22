@@ -16,7 +16,7 @@ public class Test {
 	public static void main(String[] args) {
 		
 		// on remplit le modèle
-		GraphReaderFromFile reader = new GraphReaderFromFile("graphs/graph04.txt");
+		GraphReaderFromFile reader = new GraphReaderFromFile("graphs/graph03.txt");
 
 		SimulationModel model = SimulationModel.getInstance();
 		model.print();

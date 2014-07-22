@@ -2,7 +2,6 @@ package com.github.vmarquet.graph.controler;
 
 import com.github.vmarquet.graph.model.*;
 import com.github.vmarquet.graph.view.*;
-import java.awt.*;
 
 import java.util.*; // pour les math
 
@@ -68,7 +67,7 @@ public class SimulationControler implements Runnable {
 				// Force de répulsion en 1/r avec r la distance entre les noeuds
 				// on parcours tous les noeuds
 				for (int i=0; i<model.getNumberOfNodes(); i++) {
-https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O9MQ
+
 					// on parcours tous les noeuds pas encore traités
 					for (int j=i+1; j<model.getNumberOfNodes(); j++) {
 
@@ -93,7 +92,7 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 					}
 				}
 
-				// force de frottement https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O9MQfluide: f = -lambda*v
+				// force de frottement fluide: f = -lambda*v
 				double lambda = model.getLambda();
 				for (Node node : model.getNodes()) {
 					node.for_x += -lambda*node.vit_x;
@@ -160,6 +159,7 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 				// 	System.out.println("pos_x: " + node.pos_x);
 				// 	System.out.println("pos_y: " + node.pos_y);
 				// }
+
 
 				view.updateDisplay();
 				Thread.sleep(50);  // Synchronize the simulation with real time

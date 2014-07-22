@@ -17,10 +17,10 @@ public class Node {
 	public double for_y = 0;	
 
 	// physic simulation: a node is a mass:
-	private double mass = 1.5;
+	private double mass = 1.0;
 
 	private Color color = Color.WHITE;
-	private double diameter = 0.06;
+	private double diameter = 0.04;
 
 	// constructors:
 	// if node number < 0, automatic numerotation

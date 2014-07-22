@@ -13,7 +13,7 @@ echo -e "${RED}$COMPIL${NORMAL}"
 eval "$COMPIL"
 
 # execution
-EXEC="java -cp ./build com.github.vmarquet.graph.test.Test"
+EXEC="java -cp ./build com.github.vmarquet.graph.test.Test100"
 echo -e "${RED}$EXEC${NORMAL}"
 eval "$EXEC"
 
