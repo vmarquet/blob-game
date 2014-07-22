@@ -5,6 +5,7 @@ TODO
     * clic gauche: déplacer un noeud
     * clic droit: fixer un noeud
 * faire un niveau proof of concept dans un JPanel, avec quelques obstacles
+* permettre à deux graphes de fusionner
 
 LIENS
 -----

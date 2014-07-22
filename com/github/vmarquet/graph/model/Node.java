@@ -73,6 +73,9 @@ public class Node {
 	public void release() {
 		this.grabbed = false;
 	}
+	public void setMass(double newMass) {
+		this.mass = newMass;
+	}
 
 	// getters:
 	public int getNodeNumber() {

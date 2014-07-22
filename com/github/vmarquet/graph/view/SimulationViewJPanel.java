@@ -31,8 +31,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 	public SimulationViewJPanel() {
 		
-		//Slider for link length, link rigidity, repulsion constant and lambda
-		JSlider sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda;
+		//Slider for link length, link rigidity, repulsion constant, lambda and node mass
+		JSlider sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
         
         //Slider for link length
 		sliderLinkLength = new JSlider(0,25);
@@ -122,6 +122,30 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		sliderLambda.setPaintLabels(true);  
 		sliderLambda.setPaintTicks(true);
 		this.add(sliderLambda);
+		
+		//Slider for node mass
+		sliderNodeMass = new JSlider(10,110);		
+		sliderNodeMass.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider)e.getSource();
+				if (!source.getValueIsAdjusting()) {
+						double nodeMass = (int)source.getValue();
+						System.out.println("Node Mass : "+(nodeMass/10));
+						//slider set new node mass
+						for (Node node : model.getNodes()) {
+							node.setMass(nodeMass/10);
+						}
+				}
+			}
+		});	
+		Hashtable labelTable5 = new Hashtable();
+		labelTable5.put( new Integer(60), new JLabel("Node Mass") );
+		sliderNodeMass.setLabelTable( labelTable5 );
+		sliderNodeMass.setMajorTickSpacing(100);
+		sliderNodeMass.setMinorTickSpacing(1);   
+		sliderNodeMass.setPaintLabels(true);
+		sliderNodeMass.setPaintTicks(true);
+		this.add(sliderNodeMass);
 		
 		// on récupère l'instance du modèle (pattern singleton)
 		this.model = SimulationModel.getInstance();
