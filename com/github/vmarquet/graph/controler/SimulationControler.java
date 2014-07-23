@@ -12,7 +12,7 @@ import java.util.*; // pour les math
 
 public class SimulationControler implements Runnable {
 
-	private final static int timeStep = 50;  // milliseconds
+	private final static int timeStep = 60;  // milliseconds
 	// when using timeStep during equations, timeStep should be in seconds
 	// so use (this.timeStep/1000.0)
 	// WARNING: if you use 1000 and not 1000.0, the result is false

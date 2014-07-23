@@ -17,6 +17,8 @@ import java.util.Hashtable;
 import java.awt.event.MouseListener;
 import java.awt.Point;
 
+import java.awt.geom.Path2D;
+
 
 public class SimulationViewJPanel extends JPanel implements SimulationView, MouseListener {
 
@@ -28,11 +30,18 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	private double min_size;
 
 	private Node grabbedNode = null; // link to the node that is grabbed with the mouse
+	
+	private boolean displayNumbers = true, displayNodes = true, displayShape = false; //booleans for the display (checkboxes) 
+
 
 	public SimulationViewJPanel() {
 		
 		//Slider for link length, link rigidity, repulsion constant, lambda and node mass
 		JSlider sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
+        
+        //Checkboxes for displaying numbers, nodes and/or shape
+        final JCheckBox numberButton, nodesButton, shapeButton;
+        
         
         //Slider for link length
 		sliderLinkLength = new JSlider(0,25);
@@ -147,6 +156,72 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		sliderNodeMass.setPaintTicks(true);
 		this.add(sliderNodeMass);
 		
+		//checkbox for numbers
+		numberButton = new JCheckBox("Display Numbers");
+        numberButton.setSelected(true);
+		numberButton.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				displayNumbers = false;
+				
+				Object source = e.getItemSelectable();
+
+				if (source == numberButton) {
+				    displayNumbers = true;
+
+					if (e.getStateChange() == ItemEvent.DESELECTED) {
+						displayNumbers = false;
+					}
+   				}
+   				
+   				System.out.println("Display Numbers : "+displayNumbers);
+   			}
+		});
+		this.add(numberButton);
+		
+		//checkbox for nodes
+		nodesButton = new JCheckBox("Display Nodes");
+        nodesButton.setSelected(true);
+		nodesButton.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				displayNodes = false;
+				
+				Object source = e.getItemSelectable();
+
+				if (source == nodesButton) {
+				    displayNodes = true;
+
+					if (e.getStateChange() == ItemEvent.DESELECTED) {
+						displayNodes = false;
+					}
+   				}
+   				
+   				System.out.println("Display Nodes : "+displayNodes);
+   			}
+		});
+		this.add(nodesButton);
+		
+		//checkbox for shape
+		shapeButton = new JCheckBox("Display Shape");
+        shapeButton.setSelected(false);
+		shapeButton.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				displayShape = false;
+				
+				Object source = e.getItemSelectable();
+
+				if (source == shapeButton) {
+				    displayShape = true;
+
+					if (e.getStateChange() == ItemEvent.DESELECTED) {
+						displayShape = false;
+					}
+   				}
+   				
+   				System.out.println("Display Shape : "+displayShape);
+   			}
+		});
+		this.add(shapeButton);
+		
 		// on récupère l'instance du modèle (pattern singleton)
 		this.model = SimulationModel.getInstance();
 
@@ -174,12 +249,17 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		// we compute the ratio for the display
 		computeMargin(g2d);
 
-		// we paint the objetcs
+		// we paint the objects
+		if(displayShape == true) paintShape(g2d);
 		paintLinks(g2d);
-		paintNodes(g2d);
+		if(displayNodes == true) paintNodes(g2d);
+		if(displayNumbers == true) paintNumbers(g2d);
 	}
+	
 	private void paintNodes(Graphics2D g) {
+	
 		for (Node node : model.getNodes()) {
+		
 			Color color = node.getColor();
 			double diameter = convertNodeDiameterToPixel(node);
 			// we draw the circle:
@@ -187,21 +267,46 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			g.fillOval((int)(convertNodePositionToPixelX(node)-diameter/2), 
 			           (int)(convertNodePositionToPixelY(node)-diameter/2), 
 			           (int)diameter, (int)diameter);
+		}
+
+	}
+	
+	private void paintNumbers(Graphics2D g) {
+	
+		for (Node node : model.getNodes()) {
 			
 			// we draw the text (node number / ...)
 			g.setColor(Color.BLACK);
 			g.drawString(Integer.toString(node.getNodeNumber()),
-			             (int)(convertNodePositionToPixelX(node) -7),
+			             (int)(convertNodePositionToPixelX(node) -5),
 			             (int)(convertNodePositionToPixelY(node) +4));
 		}
 
 	}
+	
+	private void paintShape(Graphics2D g){
+		//TODO : modify this shit
+		
+		//we make a path to form the pentagon and we fill it
+		Path2D.Double path = new Path2D.Double();
+		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(0)), convertNodePositionToPixelY(model.getNodeNumber(0)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(1)), convertNodePositionToPixelY(model.getNodeNumber(1)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(2)), convertNodePositionToPixelY(model.getNodeNumber(2)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(3)), convertNodePositionToPixelY(model.getNodeNumber(3)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(4)), convertNodePositionToPixelY(model.getNodeNumber(4)));
+		path.closePath();
+		g.setColor(Color.WHITE);
+		g.fill(path);
+	}
+	
 	private void paintLinks(Graphics2D g) {
+	
 		for (Link link : model.getLinks()) {
 			Color color = link.getColor();
-			g.setColor(color);
+			g.setColor(Color.WHITE);
 			Node node1 = link.getStartNode();
 			Node node2 = link.getEndNode();
+			g.setStroke(new BasicStroke(2));
 			g.drawLine((int)(convertNodePositionToPixelX(node1)), 
 			           (int)(convertNodePositionToPixelY(node1)), 
 			           (int)(convertNodePositionToPixelX(node2)), 
