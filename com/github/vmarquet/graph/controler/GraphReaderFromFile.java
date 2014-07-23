@@ -11,6 +11,9 @@ public class GraphReaderFromFile {
 	private SimulationModel model = null;
 
 	public GraphReaderFromFile(String filename) {
+		
+		int nb_graph = -1;
+	
 		// we get the instance of the model (singleton pattern)
 		this.model = SimulationModel.getInstance();
 
@@ -32,6 +35,8 @@ public class GraphReaderFromFile {
 			for (int i = 0; i < numberOfNodes; i++) {
 				Node node = new Node(i);
 				model.addNode(node);
+				// the nodes are not linked, they all have a different graph number
+				model.getNodeNumber(i).setGraphNumber(-1);
 				// we set them to random positions
 				// (it's possible to override this after)
 				node.pos_x = Math.random();
@@ -74,6 +79,20 @@ public class GraphReaderFromFile {
 						// TODO: if a link already exists, we should not create one again
 						Link link = new Link(node_start, node_end);
 						this.model.addLink(link);
+						
+						//we set the graph number
+						if(this.model.getNodeNumber(node_start).getGraphNumber() != -1) // node 1 is already in a graph
+							this.model.getNodeNumber(node_end).setGraphNumber(this.model.getNodeNumber(node_start).getGraphNumber());
+							// node 2 takes the same graph number 
+						else if(this.model.getNodeNumber(node_end).getGraphNumber() != -1) // node 2 is already in a graph
+							this.model.getNodeNumber(node_start).setGraphNumber(this.model.getNodeNumber(node_end).getGraphNumber());
+							// node 1 takes the same graph number
+						else  // the 2 nodes don't belong to the same graph
+						{     // we create a new one
+							this.model.getNodeNumber(node_start).setGraphNumber(nb_graph + 1);
+							this.model.getNodeNumber(node_end).setGraphNumber(nb_graph + 1);
+							nb_graph++;	
+						}
 						break;
 					case '#':  // commentary: "# anything"
 						break;

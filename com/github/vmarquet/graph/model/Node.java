@@ -5,6 +5,8 @@ import java.awt.Color;
 public class Node {
 
 	private int number;   // starts from 0
+	private int graphNumber; // starts from 0
+	
 	private static int totalNodeNumber = 0;
 
 	public double pos_x = 0;  // position
@@ -76,6 +78,9 @@ public class Node {
 	public void setMass(double newMass) {
 		this.mass = newMass;
 	}
+	public void setGraphNumber(int newGraphNumber) {
+		this.graphNumber = newGraphNumber;
+	}
 
 	// getters:
 	public int getNodeNumber() {
@@ -89,5 +94,8 @@ public class Node {
 	}
 	public double getDiameter() {
 		return this.diameter;
+	}
+	public int getGraphNumber() {
+		return this.graphNumber;
 	}
 }

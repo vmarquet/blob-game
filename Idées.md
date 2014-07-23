@@ -22,5 +22,5 @@ Niveaux
 * voir les moteurs physiques, certains ont des outils spéciaux pour dessiner les niveaux et détecter les collisions
 * utiliser des images et utiliser la couleur des pixels
 * utiliser des fichiers texte en ASCII art (un caractère correspond à une forme)
-* aspect graphique : colorier le blob pour avoir l'impression d'une forme (d'où le nom BLOB) [faisable?]
+* aspect graphique : colorier le blob pour avoir l'impression d'une forme (d'où le nom BLOB)
 

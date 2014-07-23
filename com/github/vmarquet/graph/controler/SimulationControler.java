@@ -75,8 +75,8 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 						Node node1 = model.getNodeNumber(i);
 						Node node2 = model.getNodeNumber(j);
 
-						// on n'applique la force répulsive qu'aux noeuds non directement reliés par ressort
-						if (model.isLinked(node1, node2) == true)
+						// on n'applique la force répulsive qu'aux noeuds non directement reliés par ressort et aux noeuds appartenant au même graphe
+						if (model.isLinked(node1, node2) == true || node1.getGraphNumber() != node2.getGraphNumber())
 							continue;
 
 						// on récupère la distance entre les noeuds
