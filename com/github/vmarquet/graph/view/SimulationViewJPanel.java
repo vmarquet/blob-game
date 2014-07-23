@@ -249,9 +249,17 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		// we compute the ratio for the display
 		computeMargin(g2d);
 
-		//check if there is a possibility to link two nodes (x2)
-		connectNodeIandNodeJ(0, 5);
-		connectNodeIandNodeJ(4, 6);
+		//check if there is a possibility to link the graphs (x2)
+		if(isFusionNodeIandNodeJ(0, 5)==true){
+			System.out.println("0 et 5 s'embrassent, ça a donné des idées à 4 et 6");
+			Link link = new Link(model.getNodeNumber(4), model.getNodeNumber(6));
+			this.model.addLink(link);
+		}
+		if(isFusionNodeIandNodeJ(4, 6)==true){
+			System.out.println("4 et 6 s'embrassent, ça a donné des idées à 0 et 5");
+			Link link = new Link(model.getNodeNumber(0), model.getNodeNumber(5));
+			this.model.addLink(link);
+		}
 
 		// we paint the objects
 		if(displayShape == true) paintShape(g2d);
@@ -318,27 +326,30 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		}
 	}
 	
-	private void connectNodeIandNodeJ(int i, int j) {
+	private boolean isFusionNodeIandNodeJ(int i, int j) {
 		//if the two nodes i and j are close to eachother they will be linked
 		if(model.isLinked(model.getNodeNumber(i), model.getNodeNumber(j)) == false){
 			double distX = convertNodePositionToPixelX(model.getNodeNumber(i)) - convertNodePositionToPixelX(model.getNodeNumber(j));
 			double distY = convertNodePositionToPixelY(model.getNodeNumber(i)) - convertNodePositionToPixelY(model.getNodeNumber(j));
 			// Get distance with Pythagoras
 			double dist = Math.sqrt((distX * distX) + (distY * distY));
-			if(dist <= (convertNodeDiameterToPixel(model.getNodeNumber(i))/0.6 + convertNodeDiameterToPixel(model.getNodeNumber(j))/0.6)){
+			if(dist <= (convertNodeDiameterToPixel(model.getNodeNumber(i))/0.8 + convertNodeDiameterToPixel(model.getNodeNumber(j))/0.8)){
 	
 				Link link = new Link(model.getNodeNumber(i), model.getNodeNumber(j));
 				this.model.addLink(link);
 		
-				//the two graphs are now the same
+				//the two graphs have to be only one graph
+				int graphToKeep = model.getNodeNumber(i).getGraphNumber();
+				int graphToErase = model.getNodeNumber(j).getGraphNumber();
 				for (Node node : model.getNodes()){
-		
-					if(node.getGraphNumber() == model.getNodeNumber(j).getGraphNumber()){
-						node.setGraphNumber(model.getNodeNumber(i).getGraphNumber());
+					if(node.getGraphNumber() == graphToErase){
+						node.setGraphNumber(graphToKeep);
 					}
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 	
 
