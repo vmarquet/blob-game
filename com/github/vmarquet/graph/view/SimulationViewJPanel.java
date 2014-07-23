@@ -263,6 +263,9 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 		// we paint the objects
 		if(displayShape == true) paintShape(g2d);
+		
+		if(displayShape == true && model.isLinked(model.getNodeNumber(4), model.getNodeNumber(6))) paintShape2(g2d);
+		
 		paintLinks(g2d);
 		if(displayNodes == true) paintNodes(g2d);
 		if(displayNumbers == true) paintNumbers(g2d);
@@ -306,6 +309,25 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(2)), convertNodePositionToPixelY(model.getNodeNumber(2)));
 		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(3)), convertNodePositionToPixelY(model.getNodeNumber(3)));
 		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(4)), convertNodePositionToPixelY(model.getNodeNumber(4)));
+		path.closePath();
+		g.setColor(Color.WHITE);
+		g.fill(path);
+		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(5)), convertNodePositionToPixelY(model.getNodeNumber(5)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(6)), convertNodePositionToPixelY(model.getNodeNumber(6)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(7)), convertNodePositionToPixelY(model.getNodeNumber(7)));
+		path.closePath();
+		g.setColor(Color.WHITE);
+		g.fill(path);
+	}
+	
+	private void paintShape2(Graphics2D g){
+		//TODO : modify this shit
+		
+		Path2D.Double path = new Path2D.Double();
+		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(5)), convertNodePositionToPixelY(model.getNodeNumber(5)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(0)), convertNodePositionToPixelY(model.getNodeNumber(0)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(4)), convertNodePositionToPixelY(model.getNodeNumber(4)));
+		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(6)), convertNodePositionToPixelY(model.getNodeNumber(6)));
 		path.closePath();
 		g.setColor(Color.WHITE);
 		g.fill(path);
