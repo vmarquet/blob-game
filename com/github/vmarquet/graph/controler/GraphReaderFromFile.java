@@ -3,8 +3,16 @@ package com.github.vmarquet.graph.controler;
 import com.github.vmarquet.graph.model.SimulationModel;
 import com.github.vmarquet.graph.model.Node;
 import com.github.vmarquet.graph.model.Link;
+import com.github.vmarquet.graph.physicalworld.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import java.io.*;
 import java.util.Scanner;
+import java.awt.Color;
 
 public class GraphReaderFromFile {
 
@@ -16,6 +24,13 @@ public class GraphReaderFromFile {
 	
 		// we get the instance of the model (singleton pattern)
 		this.model = SimulationModel.getInstance();
+
+		// we create the PhysicalWorld to store the objects of the simulation
+		// le premier arg est la force de gravité, donc on n'en met pas
+		// les 4 arg suivant sont la taille du monde
+		// (ATTENTION: il y a rapport 10: 64x72 = 640x720 pixels)
+		PhysicalWorld world = new PhysicalWorld(new Vec2(0,0), -640, 640, 0, 720, Color.WHITE);
+		model.setPhysicalWorld(world);
 
 		// we read the file containing nodes and links description
 		try {
@@ -41,6 +56,18 @@ public class GraphReaderFromFile {
 				// (it's possible to override this after)
 				node.pos_x = Math.random();
 				node.pos_y = Math.random();
+
+				// we add a circle in the physical engine
+				try {
+					// paramètres: float radius, BodyType type, Vec2 position, float orientation, Sprite sprite
+					Body body = world.addCircularObject(10f, BodyType.STATIC, new Vec2(0,0), 0, 
+					          new Sprite("node"+Integer.toString(i), 1, Color.WHITE, null));
+					node.setBody(body);
+				}
+				catch (InvalidSpriteNameException ex) {
+					ex.printStackTrace();
+				}
+
 			}
 
 			while(scanner.hasNextLine()) {

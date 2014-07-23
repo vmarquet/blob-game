@@ -1,6 +1,7 @@
 package com.github.vmarquet.graph.view;
 
 import com.github.vmarquet.graph.model.*;
+import com.github.vmarquet.graph.physicalworld.*;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.JSlider; 
@@ -18,12 +19,25 @@ import java.awt.event.MouseListener;
 import java.awt.Point;
 import java.lang.*;
 import java.awt.geom.Path2D;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
+import java.awt.image.BufferedImage;
 
 
 public class SimulationViewJPanel extends JPanel implements SimulationView, MouseListener {
 
       
     private SimulationModel model = null;
+   private float scale;
+   private PhysicalWorld world;
+   private Color backgroundColor;
+   private ImageIcon backgroundIcon;
+   private Vec2 cameraPosition;
+
 
 	private double margin_x;
 	private double margin_y;
@@ -34,230 +48,86 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	private boolean displayNumbers = true, displayNodes = true, displayShape = false; //booleans for the display (checkboxes) 
 
 
-	public SimulationViewJPanel() {
-		
-		//Slider for link length, link rigidity, repulsion constant, lambda and node mass
-		JSlider sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
-        
-        //Checkboxes for displaying numbers, nodes and/or shape
-        final JCheckBox numberButton, nodesButton, shapeButton;
-        
-        
-        //Slider for link length
-		sliderLinkLength = new JSlider(0,25);
-		sliderLinkLength.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				if (!source.getValueIsAdjusting()) {
-						double lengthValue = (int)source.getValue();
-							
-						System.out.println("Link Length : "+(lengthValue/20));
-						//slider set new link length 
-						model.setLength(lengthValue/20);
-				}
-			}
-		});
-		Hashtable labelTable1 = new Hashtable();
-		labelTable1.put( new Integer(12), new JLabel("Link Length") );
-		sliderLinkLength.setLabelTable( labelTable1 );
-		sliderLinkLength.setMajorTickSpacing(100); 
-		sliderLinkLength.setMinorTickSpacing(1);   
-		sliderLinkLength.setPaintLabels(true);  
-		sliderLinkLength.setPaintTicks(true);
-		this.add(sliderLinkLength);
-				
-		//Slider for link rigidity
-		sliderLinkRigidity = new JSlider(1,100);		
-		sliderLinkRigidity.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				if (!source.getValueIsAdjusting()) {
-						double rigidityValue = (int)source.getValue();
-						System.out.println("Link Rigidity : "+rigidityValue);
-						//slider set new link rigidity 
-						model.setRigidity(rigidityValue);
-				}
-			}
-		});
-		Hashtable labelTable2 = new Hashtable();
-		labelTable2.put( new Integer(50), new JLabel("Link Rigidity") );
-		sliderLinkRigidity.setLabelTable( labelTable2 );
-		sliderLinkRigidity.setMajorTickSpacing(10);
-		sliderLinkRigidity.setMinorTickSpacing(1);   
-		sliderLinkRigidity.setPaintLabels(true);  
-		sliderLinkRigidity.setPaintTicks(true);
-		this.add(sliderLinkRigidity);
-		
-		//Slider for link repulsion constant
-		sliderRepulsionConstant = new JSlider(1,100);		
-		sliderRepulsionConstant.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				if (!source.getValueIsAdjusting()) {
-						double repulsionConstant = (int)source.getValue();
-						System.out.println("Repulsion Constant: "+(repulsionConstant/50));
-						//slider set new repulsion constant
-						model.setRepulsionConstant(repulsionConstant/50);
-				}
-			}
-		});
-		Hashtable labelTable3 = new Hashtable();
-		labelTable3.put( new Integer(50), new JLabel("Repulsion Constant") );
-		sliderRepulsionConstant.setLabelTable( labelTable3 );
-		sliderRepulsionConstant.setMajorTickSpacing(10);
-		sliderRepulsionConstant.setMinorTickSpacing(1);   
-		sliderRepulsionConstant.setPaintLabels(true);  
-		sliderRepulsionConstant.setPaintTicks(true);
-		this.add(sliderRepulsionConstant);
-		
-		//Slider for lambda
-		sliderLambda = new JSlider(1,10);		
-		sliderLambda.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				if (!source.getValueIsAdjusting()) {
-						double lambda = (int)source.getValue();
-						System.out.println("Lambda : "+lambda);
-						//slider set new lambda
-						model.setLambda(lambda);
-				}
-			}
-		});	
-		Hashtable labelTable4 = new Hashtable();
-		labelTable4.put( new Integer(5), new JLabel("Lambda") );
-		sliderLambda.setLabelTable( labelTable4 );
-		sliderLambda.setMajorTickSpacing(10);
-		sliderLambda.setMinorTickSpacing(1);   
-		sliderLambda.setPaintLabels(true);  
-		sliderLambda.setPaintTicks(true);
-		this.add(sliderLambda);
-		
-		//Slider for node mass
-		sliderNodeMass = new JSlider(10,110);		
-		sliderNodeMass.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				if (!source.getValueIsAdjusting()) {
-						double nodeMass = (int)source.getValue();
-						System.out.println("Node Mass : "+(nodeMass/10));
-						//slider set new node mass
-						for (Node node : model.getNodes()) {
-							node.setMass(nodeMass/10);
-						}
-				}
-			}
-		});	
-		Hashtable labelTable5 = new Hashtable();
-		labelTable5.put( new Integer(60), new JLabel("Node Mass") );
-		sliderNodeMass.setLabelTable( labelTable5 );
-		sliderNodeMass.setMajorTickSpacing(100);
-		sliderNodeMass.setMinorTickSpacing(1);   
-		sliderNodeMass.setPaintLabels(true);
-		sliderNodeMass.setPaintTicks(true);
-		this.add(sliderNodeMass);
-		
-		//checkbox for numbers
-		numberButton = new JCheckBox("Display Numbers");
-        numberButton.setSelected(true);
-		numberButton.addItemListener(new ItemListener(){
-			public void itemStateChanged(ItemEvent e) {
-				displayNumbers = false;
-				
-				Object source = e.getItemSelectable();
+	public SimulationViewJPanel(PhysicalWorld world, Dimension dimension, float scale) {
 
-				if (source == numberButton) {
-				    displayNumbers = true;
-
-					if (e.getStateChange() == ItemEvent.DESELECTED) {
-						displayNumbers = false;
-					}
-   				}
-   				
-   				System.out.println("Display Numbers : "+displayNumbers);
-   			}
-		});
-		this.add(numberButton);
-		
-		//checkbox for nodes
-		nodesButton = new JCheckBox("Display Nodes");
-        nodesButton.setSelected(true);
-		nodesButton.addItemListener(new ItemListener(){
-			public void itemStateChanged(ItemEvent e) {
-				displayNodes = false;
-				
-				Object source = e.getItemSelectable();
-
-				if (source == nodesButton) {
-				    displayNodes = true;
-
-					if (e.getStateChange() == ItemEvent.DESELECTED) {
-						displayNodes = false;
-					}
-   				}
-   				
-   				System.out.println("Display Nodes : "+displayNodes);
-   			}
-		});
-		this.add(nodesButton);
-		
-		//checkbox for shape
-		shapeButton = new JCheckBox("Display Shape");
-        shapeButton.setSelected(false);
-		shapeButton.addItemListener(new ItemListener(){
-			public void itemStateChanged(ItemEvent e) {
-				displayShape = false;
-				
-				Object source = e.getItemSelectable();
-
-				if (source == shapeButton) {
-				    displayShape = true;
-
-					if (e.getStateChange() == ItemEvent.DESELECTED) {
-						displayShape = false;
-					}
-   				}
-   				
-   				System.out.println("Display Shape : "+displayShape);
-   			}
-		});
-		this.add(shapeButton);
-		
 		// on récupère l'instance du modèle (pattern singleton)
 		this.model = SimulationModel.getInstance();
 
 		// pour récupérer les mouvements de la souris:
 		addMouseListener(this);
+
+      this.world = world;
+      this.scale = scale;
+      this.backgroundColor = null;
+      this.backgroundIcon = null;
+      this.setPreferredSize(dimension);
+      // The cameraPosition in the simulation referential
+      this.cameraPosition = new Vec2(0,0);
 	}
 
 	public void updateDisplay() {
 		this.updateUI();
 		this.setGrabbedNodePosition();
+		this.setPhysicalPosition();
 	}
 	@Override
 	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+		// super.paintComponent(g);
 
-		// on caste l'objet Graphics en Graphics2D car plus de fonctionnalités
-		Graphics2D g2d = (Graphics2D) g;
-		// si on veut de l'antialiasing (ATTENTION ça fait ramer un max quand beaucoupd de noeuds)
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		// // on caste l'objet Graphics en Graphics2D car plus de fonctionnalités
+		// Graphics2D g2d = (Graphics2D) g;
+		// // si on veut de l'antialiasing (ATTENTION ça fait ramer un max quand beaucoupd de noeuds)
+		// g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		// we clear the background
-		Color backgroundColor = Color.decode("#000000");
-		this.setBackground(backgroundColor);
+		// // we clear the background
+		// Color backgroundColor = Color.decode("#000000");
+		// this.setBackground(backgroundColor);
 
-		// we compute the ratio for the display
-		computeMargin(g2d);
+		// // we compute the ratio for the display
+		// computeMargin(g2d);
 
-		//check if there is a possibility to link two nodes (x2)
-		connectNodeIandNodeJ(0, 5);
-		connectNodeIandNodeJ(4, 6);
+		// //check if there is a possibility to link two nodes (x2)
+		// connectNodeIandNodeJ(0, 5);
+		// connectNodeIandNodeJ(4, 6);
 
-		// we paint the objects
-		if(displayShape == true) paintShape(g2d);
-		paintLinks(g2d);
-		if(displayNodes == true) paintNodes(g2d);
-		if(displayNumbers == true) paintNumbers(g2d);
+		// // we paint the objects
+		// if(displayShape == true) paintShape(g2d);
+		// paintLinks(g2d);
+		// if(displayNodes == true) paintNodes(g2d);
+		// if(displayNumbers == true) paintNumbers(g2d);
+
+		/* Painting the whole world in the buffer image */
+     	  
+      	 // The buffer is an image containing the painting of the whole world
+        // The painting of the SimulationViewJBox2D will be a crop of this image, centered around the camera
+        BufferedImage buffer = new BufferedImage(toScale(world.getWidth()), toScale(world.getHeight()), BufferedImage.TYPE_INT_RGB);
+     	  
+     	  // Get the Graphics context from the image (different from the Graphics context from the JPanel)
+     	  Graphics imageGraphics = buffer.getGraphics();
+     	  // Clear the image
+        imageGraphics.clearRect(0, 0, buffer.getWidth(), buffer.getHeight());
+        // Fill background with color
+        if(backgroundColor!=null) {
+        	imageGraphics.setColor(backgroundColor);
+        	imageGraphics.fillRect(0,0, buffer.getWidth(), buffer.getHeight());
+        }
+        // Paint the background image (the image is scaled to fit the PhysicalWorld dimension)
+        if(backgroundIcon != null) {
+        	Sprite.rotatedPaint(imageGraphics, backgroundIcon, 0, 0 , ((float)buffer.getWidth())/backgroundIcon.getIconWidth(), ((float)buffer.getHeight())/backgroundIcon.getIconHeight(), 0, 0, 0);
+        }
+        // If the SimulationViewJBox2D is linked to a PhysicalWorld
+        if(world != null) {
+        	 world.paint(imageGraphics, this);
+        	 // world.paint appelle Sprite.paint() sur tous les sprites du tableau de sprites
+        }
+        
+        /* Painting the JPanel as a crop from the buffer image */
+        // Clear the JPanel
+        g.clearRect(0, 0, getWidth(), getHeight());
+        // Get the camera's coordinate in JPanel referential
+        Point cam = convert4draw(cameraPosition);
+        // Center the JPanel on the camera and print the buffer image in the JPanel
+        g.drawImage(buffer, this.getWidth()/2 - cam.x, this.getHeight()/2 -cam.y , null);
 	}
 	
 	private void paintNodes(Graphics2D g) {
@@ -477,4 +347,55 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		this.grabbedNode.setPosition(x,y);
 
 	}
+
+
+	    /**
+     * Set the camera position (in the simulation referential)
+     * @param cameraPosition the cameraPosition (in the simulation referential)
+     */
+    public void setCameraPosition(Vec2 cameraPosition) {
+    	this.cameraPosition.set(cameraPosition);
+    }
+    
+    /**
+     * Set the background color
+     * @param backgroundColor the new Color for the background
+     */
+    public void setBackGroundColor(Color backgroundColor) {
+    	this.backgroundColor = backgroundColor;
+    }
+    
+    /**
+     * Set the background image
+     * @param backgroundIcon the new ImageIcon for the background
+     */
+    public void setBackGroundIcon(ImageIcon backgroundIcon) {
+    	this.backgroundIcon = backgroundIcon;
+    }
+    
+    /**
+     * Convert a simulation's size into pixel'size
+     * @param value the value in the simulation
+     * @return the value in pixel
+     */
+    public int toScale(float value) {
+    	return Math.round(value *scale);
+    }
+    
+    /**
+     * Convert simulation coordinate (Origin centered, Positive ordinate up) into JPanel coordinate (Top-left origin, Positive ordinate down)
+     * @param v a Vec2 vector coordinate in simulation referential
+     * @return a Point vector in JPanel referential
+     */
+    public Point convert4draw(Vec2 v) { // Change orientation of the referentiel and put to scale
+    	return  new Point(toScale(v.x - world.getXMin()), toScale(world.getYMax() - (v.y)));
+    }
+
+    private void setPhysicalPosition() {
+    	for (Node node : model.getNodes()) {
+    		Body body = node.getBody();
+    		body.setTransform(new Vec2(15,15), 0);
+    	}
+    }
+
 }

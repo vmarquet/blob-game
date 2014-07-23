@@ -2,6 +2,7 @@ package com.github.vmarquet.graph.controler;
 
 import com.github.vmarquet.graph.model.*;
 import com.github.vmarquet.graph.view.*;
+import com.github.vmarquet.graph.physicalworld.*;
 import java.awt.*;
 
 import java.util.*; // pour les math
@@ -19,11 +20,18 @@ public class SimulationControler implements Runnable {
 
 	private SimulationModel model = null;
 	private SimulationView view = null;
+	private PhysicalWorld world = null;
 
 	public SimulationControler(SimulationView view) {
 		// we get the instance of the model (singleton pattern)
 		this.model = SimulationModel.getInstance();
 		this.view = view;
+		this.world = this.model.getPhysicalWorld();
+
+		// we convert the timestep to seconds
+		float timeStepJBox2d = (float)(this.timeStep)*0.001f;
+		// we set the timestep for jBox2d
+		this.world.setTimeStep(timeStep);
 	}
 
 	// threaded function, the heart of the physics simulation
@@ -164,7 +172,8 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 				// }
 
 				view.updateDisplay();
-				Thread.sleep(50);  // Synchronize the simulation with real time
+				this.world.step();  // jBox2d mouvements
+				Thread.sleep(timeStep);  // Synchronize the simulation with real time
 			}
 		}
 		catch(InterruptedException ex) {

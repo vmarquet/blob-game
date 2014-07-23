@@ -10,6 +10,7 @@ import com.github.vmarquet.graph.controler.SimulationControler;
 import javax.swing.JFrame;
 import java.lang.Thread;
 import javax.swing.WindowConstants;
+import java.awt.Dimension;
 
 public class Test {
 
@@ -22,7 +23,7 @@ public class Test {
 		model.print();
 
 		// on crée une vue pour la simulation
-		SimulationViewJPanel panel = new SimulationViewJPanel();
+		SimulationViewJPanel panel = new SimulationViewJPanel(model.getPhysicalWorld(), new Dimension(1280,720),1f);
 		JFrame fen = new JFrame();
 		fen.setSize(640,480);
 		//fen.setResizable(false);

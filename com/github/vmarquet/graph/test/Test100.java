@@ -16,27 +16,27 @@ public class Test100 {
 
 	public static void main(String[] args) {
 
-		// on remplit le modèle
-		GraphGeneratorRandom generator = new GraphGeneratorRandom(100);
+		// // on remplit le modèle
+		// GraphGeneratorRandom generator = new GraphGeneratorRandom(100);
 
-		SimulationModel model = SimulationModel.getInstance();
-		model.print();
+		// SimulationModel model = SimulationModel.getInstance();
+		// model.print();
 
-		// on crée une vue pour la simulation
-		SimulationViewJPanel panel = new SimulationViewJPanel();
-		JFrame fen = new JFrame();
-		fen.setSize(640,480);
-		//fen.setResizable(false);
-		fen.add(panel);
-		fen.setVisible(true);
-		fen.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		panel.requestFocus();
+		// // on crée une vue pour la simulation
+		// SimulationViewJPanel panel = new SimulationViewJPanel();
+		// JFrame fen = new JFrame();
+		// fen.setSize(640,480);
+		// //fen.setResizable(false);
+		// fen.add(panel);
+		// fen.setVisible(true);
+		// fen.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		// panel.requestFocus();
 
-		// on lance la simulation
-		Thread thread = new Thread(new SimulationControler(panel));
-		thread.start();
+		// // on lance la simulation
+		// Thread thread = new Thread(new SimulationControler(panel));
+		// thread.start();
 
-		return;
+		// return;
 	}
 
 }
