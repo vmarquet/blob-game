@@ -16,7 +16,7 @@ import javax.swing.event.*;
 import java.util.Hashtable;
 import java.awt.event.MouseListener;
 import java.awt.Point;
-
+import java.lang.*;
 import java.awt.geom.Path2D;
 
 
@@ -249,6 +249,10 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		// we compute the ratio for the display
 		computeMargin(g2d);
 
+		//check if there is a possibility to link two nodes (x2)
+		connectNodeIandNodeJ(0, 5);
+		connectNodeIandNodeJ(4, 6);
+
 		// we paint the objects
 		if(displayShape == true) paintShape(g2d);
 		paintLinks(g2d);
@@ -257,7 +261,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	}
 	
 	private void paintNodes(Graphics2D g) {
-	
+			
 		for (Node node : model.getNodes()) {
 		
 			Color color = node.getColor();
@@ -313,6 +317,30 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			           (int)(convertNodePositionToPixelY(node2)));
 		}
 	}
+	
+	private void connectNodeIandNodeJ(int i, int j) {
+		//if the two nodes i and j are close to eachother they will be linked
+		if(model.isLinked(model.getNodeNumber(i), model.getNodeNumber(j)) == false){
+			double distX = convertNodePositionToPixelX(model.getNodeNumber(i)) - convertNodePositionToPixelX(model.getNodeNumber(j));
+			double distY = convertNodePositionToPixelY(model.getNodeNumber(i)) - convertNodePositionToPixelY(model.getNodeNumber(j));
+			// Get distance with Pythagoras
+			double dist = Math.sqrt((distX * distX) + (distY * distY));
+			if(dist <= (convertNodeDiameterToPixel(model.getNodeNumber(i))/0.6 + convertNodeDiameterToPixel(model.getNodeNumber(j))/0.6)){
+	
+				Link link = new Link(model.getNodeNumber(i), model.getNodeNumber(j));
+				this.model.addLink(link);
+		
+				//the two graphs are now the same
+				for (Node node : model.getNodes()){
+		
+					if(node.getGraphNumber() == model.getNodeNumber(j).getGraphNumber()){
+						node.setGraphNumber(model.getNodeNumber(i).getGraphNumber());
+					}
+				}
+			}
+		}
+	}
+	
 
 	public void computeMargin(Graphics2D g) {
 		int width = this.getWidth();
