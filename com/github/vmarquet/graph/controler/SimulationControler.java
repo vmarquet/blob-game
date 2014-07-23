@@ -59,8 +59,8 @@ public class SimulationControler implements Runnable {
 
 					// on en déduit la force:
 					// négatif = ressort étiré, positif = ressort contracté
-					double lrepos = model.getLength();
-					double k = model.getRigidity();
+					double lrepos = link.getLength();
+					double k = link.getRigidity();
 					double f = -k*(distance-lrepos);
 					link.applyForceBetweenNodes(f);
 				}

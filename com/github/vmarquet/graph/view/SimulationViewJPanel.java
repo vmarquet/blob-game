@@ -50,10 +50,11 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 				JSlider source = (JSlider)e.getSource();
 				if (!source.getValueIsAdjusting()) {
 						double lengthValue = (int)source.getValue();
-							
 						System.out.println("Link Length : "+(lengthValue/20));
-						//slider set new link length 
-						model.setLength(lengthValue/20);
+						//slider set new link length
+						for (Link link : model.getLinks()) {
+							link.setLength(lengthValue/20);
+						}	
 				}
 			}
 		});
@@ -74,8 +75,10 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 				if (!source.getValueIsAdjusting()) {
 						double rigidityValue = (int)source.getValue();
 						System.out.println("Link Rigidity : "+rigidityValue);
-						//slider set new link rigidity 
-						model.setRigidity(rigidityValue);
+						//slider set new link rigidity
+						for (Link link : model.getLinks()) {
+							link.setRigidity(rigidityValue);
+						}
 				}
 			}
 		});
@@ -106,7 +109,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		sliderRepulsionConstant.setLabelTable( labelTable3 );
 		sliderRepulsionConstant.setMajorTickSpacing(10);
 		sliderRepulsionConstant.setMinorTickSpacing(1);   
-		sliderRepulsionConstant.setPaintLabels(true);  
+		sliderRepulsionConstant.setPaintLabels(true);
 		sliderRepulsionConstant.setPaintTicks(true);
 		this.add(sliderRepulsionConstant);
 		
@@ -253,11 +256,13 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		if(isFusionNodeIandNodeJ(0, 5)==true){
 			System.out.println("0 et 5 s'embrassent, ça a donné des idées à 4 et 6");
 			Link link = new Link(model.getNodeNumber(4), model.getNodeNumber(6));
+			link.setLength(0.025);
 			this.model.addLink(link);
 		}
 		if(isFusionNodeIandNodeJ(4, 6)==true){
 			System.out.println("4 et 6 s'embrassent, ça a donné des idées à 0 et 5");
 			Link link = new Link(model.getNodeNumber(0), model.getNodeNumber(5));
+			link.setLength(0.025);
 			this.model.addLink(link);
 		}
 
@@ -358,6 +363,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			if(dist <= (convertNodeDiameterToPixel(model.getNodeNumber(i))/0.8 + convertNodeDiameterToPixel(model.getNodeNumber(j))/0.8)){
 	
 				Link link = new Link(model.getNodeNumber(i), model.getNodeNumber(j));
+				link.setLength(0.025);
 				this.model.addLink(link);
 		
 				//the two graphs have to be only one graph

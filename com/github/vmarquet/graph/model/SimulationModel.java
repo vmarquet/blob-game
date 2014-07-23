@@ -12,8 +12,6 @@ public class SimulationModel {  // singleton pattern
 	// physic simulation:
 	private double lambda = 3.0;   // constante de frottements
 	private double coef_repulsion = 0.5;  // constante de répulsion
-	private double length = 0.1;  // longueur au repos
-	private double rigidity = 50.0;  // constante de raideur
 
 	private SimulationModel() {
 		this.nodes = new ArrayList<Node>();
@@ -62,23 +60,11 @@ public class SimulationModel {  // singleton pattern
 	public double getCoefRepulsion() {
 		return this.coef_repulsion;
 	}
-	public double getLength() {
-		return this.length;
-	}
-	public double getRigidity() {
-		return this.rigidity;
-	}
 
 	// setters:
 	public void setNodePosition(int number, double X, double Y) {
 		Node node = getNodeNumber(number);
 		node.setPosition(X,Y);
-	}	
-	public void setLength(double newLength){
-		this.length = newLength;
-	}
-	public void setRigidity(double newRigidity){
-		this.rigidity = newRigidity;
 	}
 	public void setRepulsionConstant(double newRepulsionConstant){
 		this.coef_repulsion = newRepulsionConstant;

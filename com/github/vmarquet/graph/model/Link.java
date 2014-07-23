@@ -9,6 +9,9 @@ public class Link {
 
 	private Node node_start = null;
 	private Node node_end   = null;
+	
+	private double length = 0.1;  // longueur au repos
+	private double rigidity = 50.0;  // constante de raideur
 
 	private Color color = Color.decode("#888888");
 
@@ -50,7 +53,20 @@ public class Link {
 	public Color getColor() {
 		return this.color;
 	}
+	public double getLength() {
+		return this.length;
+	}
+	public double getRigidity() {
+		return this.rigidity;
+	}
 	
+	//setters:
+	public void setLength(double newLength) {
+		this.length = newLength;
+	}
+	public void setRigidity(double newRigidity) {
+		this.rigidity = newRigidity;
+	}
 
 	// pour les forces qui s'appliquent d'un noeud sur l'autre
 	public void applyForceBetweenNodes(double f) {
