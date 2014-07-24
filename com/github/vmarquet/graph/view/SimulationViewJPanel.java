@@ -32,16 +32,56 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	private Node grabbedNode = null; // link to the node that is grabbed with the mouse
 	
 	private boolean displayNumbers = true, displayNodes = true, displayShape = false; //booleans for the display (checkboxes) 
+	
+	private double zoomValue = 2.0; //valeur de l'échelle du zoom (1:1 --> 1:10)
 
 
 	public SimulationViewJPanel() {
 		
-		//Slider for link length, link rigidity, repulsion constant, lambda and node mass
-		JSlider sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
+		//Button to center all nodes
+		JButton centerButton;
+		
+		//Slider for zoom, link length, link rigidity, repulsion constant, lambda and node mass
+		JSlider sliderZoom, sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
         
         //Checkboxes for displaying numbers, nodes and/or shape
         final JCheckBox numberButton, nodesButton, shapeButton;
         
+        
+        //Button to center all nodes
+        centerButton = new JButton("Sylvester Stallone CENTER");
+        centerButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+		    	for (Node node : model.getNodes()) {
+		    		//TODO : PIMP THAT SHIT
+					node.setPosition(convertPixelToNodePositionX((int)(withDezoomX(getWidth()/2))), convertPixelToNodePositionX((int)(withDezoomY(getHeight()/2))));
+				}
+		    }          
+     	});
+        this.add(centerButton); 
+        
+        //Slider for zoom
+		sliderZoom = new JSlider(1,100);
+		sliderZoom.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider)e.getSource();
+				
+						double zoomValue = (int)source.getValue();
+						System.out.println("Zoom : échelle 1:"+zoomValue/10);
+						//slider set new zoom
+						setZoomValue(zoomValue/10);
+			}
+		});
+		Hashtable labelTable0 = new Hashtable();
+		labelTable0.put( new Integer(50), new JLabel("Zoom") );
+		sliderZoom.setLabelTable( labelTable0 );
+		sliderZoom.setMajorTickSpacing(100); 
+		sliderZoom.setMinorTickSpacing(1);
+		sliderZoom.setValue(20); 
+		sliderZoom.setPaintLabels(true);  
+		sliderZoom.setPaintTicks(true);
+		this.add(sliderZoom);
+		
         
         //Slider for link length
 		sliderLinkLength = new JSlider(0,25);
@@ -174,8 +214,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 					if (e.getStateChange() == ItemEvent.DESELECTED) {
 						displayNumbers = false;
 					}
-   				}
-   				
+   				}			
    				System.out.println("Display Numbers : "+displayNumbers);
    			}
 		});
@@ -284,8 +323,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			double diameter = convertNodeDiameterToPixel(node);
 			// we draw the circle:
 			g.setColor(color);
-			g.fillOval((int)(convertNodePositionToPixelX(node)-diameter/2), 
-			           (int)(convertNodePositionToPixelY(node)-diameter/2), 
+			g.fillOval((int)(withZoomX(convertNodePositionToPixelX(node))-diameter/2), 
+			           (int)(withZoomY(convertNodePositionToPixelY(node))-diameter/2), 
 			           (int)diameter, (int)diameter);
 		}
 
@@ -294,12 +333,11 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	private void paintNumbers(Graphics2D g) {
 	
 		for (Node node : model.getNodes()) {
-			
 			// we draw the text (node number / ...)
 			g.setColor(Color.BLACK);
 			g.drawString(Integer.toString(node.getNodeNumber()),
-			             (int)(convertNodePositionToPixelX(node) -5),
-			             (int)(convertNodePositionToPixelY(node) +4));
+			             (int)(withZoomX(convertNodePositionToPixelX(node)) -5),
+			             (int)(withZoomY(convertNodePositionToPixelY(node)) +4));
 		}
 
 	}
@@ -309,17 +347,17 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		
 		//we make a path to form the pentagon and we fill it
 		Path2D.Double path = new Path2D.Double();
-		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(0)), convertNodePositionToPixelY(model.getNodeNumber(0)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(1)), convertNodePositionToPixelY(model.getNodeNumber(1)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(2)), convertNodePositionToPixelY(model.getNodeNumber(2)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(3)), convertNodePositionToPixelY(model.getNodeNumber(3)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(4)), convertNodePositionToPixelY(model.getNodeNumber(4)));
+		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(0))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(0))));
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(1))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(1))));		
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(2))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(2))));	
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(3))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(3))));	
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(4))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(4))));
 		path.closePath();
 		g.setColor(Color.WHITE);
 		g.fill(path);
-		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(5)), convertNodePositionToPixelY(model.getNodeNumber(5)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(6)), convertNodePositionToPixelY(model.getNodeNumber(6)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(7)), convertNodePositionToPixelY(model.getNodeNumber(7)));
+		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(5))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(5))));
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(6))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(6))));		
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(7))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(7))));
 		path.closePath();
 		g.setColor(Color.WHITE);
 		g.fill(path);
@@ -329,10 +367,10 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		//TODO : modify this shit
 		
 		Path2D.Double path = new Path2D.Double();
-		path.moveTo(convertNodePositionToPixelX(model.getNodeNumber(5)), convertNodePositionToPixelY(model.getNodeNumber(5)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(0)), convertNodePositionToPixelY(model.getNodeNumber(0)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(4)), convertNodePositionToPixelY(model.getNodeNumber(4)));
-		path.lineTo(convertNodePositionToPixelX(model.getNodeNumber(6)), convertNodePositionToPixelY(model.getNodeNumber(6)));
+		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(5))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(5))));
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(0))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(0))));		
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(4))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(4))));	
+		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(6))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(6))));
 		path.closePath();
 		g.setColor(Color.WHITE);
 		g.fill(path);
@@ -346,10 +384,11 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			Node node1 = link.getStartNode();
 			Node node2 = link.getEndNode();
 			g.setStroke(new BasicStroke(2));
-			g.drawLine((int)(convertNodePositionToPixelX(node1)), 
-			           (int)(convertNodePositionToPixelY(node1)), 
-			           (int)(convertNodePositionToPixelX(node2)), 
-			           (int)(convertNodePositionToPixelY(node2)));
+			
+			g.drawLine((int)(withZoomX(convertNodePositionToPixelX(node1))),
+			           (int)(withZoomY(convertNodePositionToPixelY(node1))),
+			           (int)(withZoomX(convertNodePositionToPixelX(node2))),
+			           (int)(withZoomY(convertNodePositionToPixelY(node2))));
 		}
 	}
 	
@@ -425,6 +464,32 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		double y_f = (double)y;
 		return (y_f-margin_y)/min_size;
 	}
+	private double withZoomX(double pixel){
+		int width = this.getWidth();
+		return ((pixel + width/2)/this.getZoomValue());
+	}
+	private double withZoomY(double pixel){
+		int height = this.getHeight();
+		return ((pixel + height/2)/this.getZoomValue());
+	}
+	private double withDezoomX(double pixel){
+		int width = this.getWidth();
+		return (this.getZoomValue()*pixel-width/2);
+	}
+	private double withDezoomY(double pixel){
+		int height = this.getHeight();
+		return (this.getZoomValue()*pixel-height/2);
+	}
+	
+	//setters:
+	private void setZoomValue(double zoomValue){
+		this.zoomValue = zoomValue;
+	}
+	//getters:
+	private double getZoomValue(){
+		return this.zoomValue;
+	}
+	
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -438,8 +503,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 			// on parcourt tous les noeuds pour trouver celui sur lequel on a cliqué
 			for (Node node : model.getNodes()) {
-				double X = convertNodePositionToPixelX(node);
-				double Y = convertNodePositionToPixelY(node);
+				double X = withZoomX(convertNodePositionToPixelX(node));
+				double Y = withZoomY(convertNodePositionToPixelY(node));
 				double gap_x = X - x;
 				double gap_y = Y - y;
 				double distance = Math.sqrt(gap_x*gap_x + gap_y*gap_y);
@@ -464,8 +529,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 			// on parcourt tous les noeuds pour trouver celui que l'on a attrapé ("grabbed")
 			for (Node node : model.getNodes()) {
-				double X = convertNodePositionToPixelX(node);
-				double Y = convertNodePositionToPixelY(node);
+				double X = withZoomX(convertNodePositionToPixelX(node));
+				double Y = withZoomY(convertNodePositionToPixelY(node));
 				double gap_x = X - x;
 				double gap_y = Y - y;
 				double distance = Math.sqrt(gap_x*gap_x + gap_y*gap_y);
@@ -511,8 +576,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 			return;
 		}
 
-		double x = convertPixelToNodePositionX((int)pos.getX());
-		double y = convertPixelToNodePositionY((int)pos.getY());
+		double x = convertPixelToNodePositionX((int)(withDezoomX(pos.getX())));
+		double y = convertPixelToNodePositionY((int)(withDezoomY(pos.getY())));
 		this.grabbedNode.setPosition(x,y);
 
 	}
