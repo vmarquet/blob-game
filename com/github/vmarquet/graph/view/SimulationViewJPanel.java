@@ -31,9 +31,9 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 	private Node grabbedNode = null; // link to the node that is grabbed with the mouse
 	
-	private boolean displayNumbers = true, displayNodes = true, displayShape = false; //booleans for the display (checkboxes) 
+	private boolean displayNumbers = false, displayNodes = false, displayShape = true; //booleans for the display (checkboxes) 
 	
-	private double zoomValue = 2.0; //valeur de l'échelle du zoom (1:1 --> 1:10)
+	private double zoomValue = 5.0; //valeur de l'échelle du zoom (1:1 --> 1:10)
 
 
 	public SimulationViewJPanel() {
@@ -77,8 +77,8 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		sliderZoom.setLabelTable( labelTable0 );
 		sliderZoom.setMajorTickSpacing(100); 
 		sliderZoom.setMinorTickSpacing(1);
-		sliderZoom.setValue(20); 
-		sliderZoom.setPaintLabels(true);  
+		sliderZoom.setValue(50); 
+		sliderZoom.setPaintLabels(true);
 		sliderZoom.setPaintTicks(true);
 		this.add(sliderZoom);
 		
@@ -291,25 +291,73 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		// we compute the ratio for the display
 		computeMargin(g2d);
 
-		//check if there is a possibility to link the graphs (x2)
-		if(isFusionNodeIandNodeJ(0, 5)==true){
-			System.out.println("0 et 5 s'embrassent, ça a donné des idées à 4 et 6");
-			Link link = new Link(model.getNodeNumber(4), model.getNodeNumber(6));
-			link.setLength(0.025);
-			this.model.addLink(link);
+		// check if there is a possibility to link the graphs
+		// for each combinaison of nodes 
+		for (Node i : model.getNodes()){
+			for (Node j : model.getNodes()){
+				//if they don't belong to the same graph
+				if(i.getGraphNumber() != j.getGraphNumber()) {
+					double distX = convertNodePositionToPixelX(i) - convertNodePositionToPixelX(j);
+					double distY = convertNodePositionToPixelY(i) - convertNodePositionToPixelY(j);
+					// Get distance with Pythagoras
+					double dist = Math.sqrt((distX * distX) + (distY * distY));
+					// if these links are close enougth
+					if( dist <= (convertNodeDiameterToPixel(i)/0.8 + convertNodeDiameterToPixel(j)/0.8) ){
+						// we get 2 nodes i_ and j_ that are close from each graph (linked to the i and j nodes)
+						int i_Number=-1, j_Number=-1;
+						// getting a node i_ near i
+						for (Node i_ : model.getNodes()){	
+							if(model.isLinked(i_, i) == true){
+								i_Number = i_.getNodeNumber();
+							}
+						}
+						// getting a node j_ near j
+						for (Node j_ : model.getNodes()){
+							
+							if(model.isLinked(j_, j) == true){
+								j_Number = j_.getNodeNumber();
+							}
+						}
+					
+						// we link i j and i_ j_ with a special link
+						Link link1 = new Link(i.getNodeNumber(), j.getNodeNumber());
+						link1.setLength(0.0025);
+						link1.setRigidity(80.0);
+						this.model.addLink(link1);
+						Link link2 = new Link(i_Number, j_Number);
+						link2.setLength(0.0025);
+						link2.setRigidity(80.0);
+						this.model.addLink(link2);
+						
+						//the two graphs have to be only one graph
+						int graphToKeep = i.getGraphNumber();
+						int graphToErase = j.getGraphNumber();
+						for (Node node : model.getNodes()){
+							if(node.getGraphNumber() == graphToErase){
+								node.setGraphNumber(graphToKeep);
+							}
+						}
+					}
+				}
+			}
 		}
-		if(isFusionNodeIandNodeJ(4, 6)==true){
-			System.out.println("4 et 6 s'embrassent, ça a donné des idées à 0 et 5");
-			Link link = new Link(model.getNodeNumber(0), model.getNodeNumber(5));
-			link.setLength(0.025);
-			this.model.addLink(link);
-		}
+		
+		int [] pentagon = {0,1,2,3,4};
+		int [] triangle = {5,6,7};
+		int [] square = {8,9,10,11};
+		int [] shapePart1 = {12,13,14};
+		int [] shapePart2 = {12,14,15};
+		int [] shapePart3 = {12,15,16,17};
 
 		// we paint the objects
-		if(displayShape == true) paintShape(g2d);
-		
-		if(displayShape == true && model.isLinked(model.getNodeNumber(4), model.getNodeNumber(6))) paintShape2(g2d);
-		
+		if(displayShape == true) {
+			paintShape(g2d,pentagon);
+			paintShape(g2d,triangle);
+			paintShape(g2d,square);
+			paintShape(g2d,shapePart1);
+			paintShape(g2d,shapePart2);
+			paintShape(g2d,shapePart3);
+		}
 		paintLinks(g2d);
 		if(displayNodes == true) paintNodes(g2d);
 		if(displayNumbers == true) paintNumbers(g2d);
@@ -342,35 +390,14 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 
 	}
 	
-	private void paintShape(Graphics2D g){
+	private void paintShape(Graphics2D g, int[] nodeShape){
 		//TODO : modify this shit
 		
 		//we make a path to form the pentagon and we fill it
 		Path2D.Double path = new Path2D.Double();
-		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(0))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(0))));
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(1))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(1))));		
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(2))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(2))));	
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(3))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(3))));	
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(4))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(4))));
-		path.closePath();
-		g.setColor(Color.WHITE);
-		g.fill(path);
-		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(5))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(5))));
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(6))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(6))));		
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(7))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(7))));
-		path.closePath();
-		g.setColor(Color.WHITE);
-		g.fill(path);
-	}
-	
-	private void paintShape2(Graphics2D g){
-		//TODO : modify this shit
-		
-		Path2D.Double path = new Path2D.Double();
-		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(5))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(5))));
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(0))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(0))));		
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(4))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(4))));	
-		path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(6))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(6))));
+		path.moveTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(nodeShape[0]))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(nodeShape[0]))));
+		for (int i = 0; i < nodeShape.length ; i++)
+			path.lineTo(withZoomX(convertNodePositionToPixelX(model.getNodeNumber(nodeShape[i]))), withZoomY(convertNodePositionToPixelY(model.getNodeNumber(nodeShape[i]))));		
 		path.closePath();
 		g.setColor(Color.WHITE);
 		g.fill(path);
@@ -392,34 +419,6 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		}
 	}
 	
-	private boolean isFusionNodeIandNodeJ(int i, int j) {
-		//if the two nodes i and j are close to eachother they will be linked
-		if(model.isLinked(model.getNodeNumber(i), model.getNodeNumber(j)) == false){
-			double distX = convertNodePositionToPixelX(model.getNodeNumber(i)) - convertNodePositionToPixelX(model.getNodeNumber(j));
-			double distY = convertNodePositionToPixelY(model.getNodeNumber(i)) - convertNodePositionToPixelY(model.getNodeNumber(j));
-			// Get distance with Pythagoras
-			double dist = Math.sqrt((distX * distX) + (distY * distY));
-			if(dist <= (convertNodeDiameterToPixel(model.getNodeNumber(i))/0.8 + convertNodeDiameterToPixel(model.getNodeNumber(j))/0.8)){
-	
-				Link link = new Link(model.getNodeNumber(i), model.getNodeNumber(j));
-				link.setLength(0.025);
-				this.model.addLink(link);
-		
-				//the two graphs have to be only one graph
-				int graphToKeep = model.getNodeNumber(i).getGraphNumber();
-				int graphToErase = model.getNodeNumber(j).getGraphNumber();
-				for (Node node : model.getNodes()){
-					if(node.getGraphNumber() == graphToErase){
-						node.setGraphNumber(graphToKeep);
-					}
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-	
-
 	public void computeMargin(Graphics2D g) {
 		int width = this.getWidth();
 		int height = this.getHeight();
