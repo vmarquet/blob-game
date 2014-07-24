@@ -201,7 +201,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		
 		//checkbox for numbers
 		numberButton = new JCheckBox("Display Numbers");
-        numberButton.setSelected(true);
+        numberButton.setSelected(false);
 		numberButton.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				displayNumbers = false;
@@ -222,7 +222,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		
 		//checkbox for nodes
 		nodesButton = new JCheckBox("Display Nodes");
-        nodesButton.setSelected(true);
+        nodesButton.setSelected(false);
 		nodesButton.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				displayNodes = false;
@@ -244,7 +244,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		
 		//checkbox for shape
 		shapeButton = new JCheckBox("Display Shape");
-        shapeButton.setSelected(false);
+        shapeButton.setSelected(true);
 		shapeButton.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				displayShape = false;
