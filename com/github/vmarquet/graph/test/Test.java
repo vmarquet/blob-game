@@ -7,11 +7,18 @@ import com.github.vmarquet.graph.view.SimulationView;
 import com.github.vmarquet.graph.view.SimulationViewJPanel;
 import com.github.vmarquet.graph.controler.GraphReaderFromFile;
 import com.github.vmarquet.graph.controler.SimulationControler;
+import com.github.vmarquet.graph.physicalworld.*;
 import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import javax.swing.JFrame;
 import java.lang.Thread;
 import javax.swing.WindowConstants;
 import java.awt.Dimension;
+import java.awt.Color;
 
 public class Test {
 
@@ -45,6 +52,18 @@ public class Test {
 		// on lance la simulation
 		Thread thread = new Thread(new SimulationControler(panel));
 		thread.start();
+
+		try {
+			Body body = model.getPhysicalWorld().addCircularObject(10f, BodyType.DYNAMIC, new Vec2(100,100), 0, 
+					          new Sprite("TEST", 1, Color.WHITE, null));
+			body.applyForceToCenter(new Vec2(100,100));
+			body.getFixtureList().setSensor(false);
+			body.setLinearVelocity(new Vec2(5000,0));
+			Body body2 = model.getPhysicalWorld().addCircularObject(10f, BodyType.DYNAMIC, new Vec2(200,100), 0, 
+					          new Sprite("TEST2", 1, Color.WHITE, null));
+		} catch (InvalidSpriteNameException e) {
+			e.printStackTrace();
+		}
 
 		return;
 	}

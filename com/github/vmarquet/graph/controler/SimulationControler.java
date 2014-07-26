@@ -202,6 +202,10 @@ public class SimulationControler implements Runnable, ContactListener {
 	    +" "+Sprite.extractSprite(contact.getFixtureB().getBody()).getName() ); 
 	}
 	/* unused advanced stuff */
-	public void postSolve(Contact contact, ContactImpulse impulse) {}
-	public void preSolve(Contact contact, Manifold oldManifold) {}
+	public void postSolve(Contact contact, ContactImpulse impulse) {
+		System.out.println("Contact: postSove");
+	}
+	public void preSolve(Contact contact, Manifold oldManifold) {
+		System.out.println("Contact: preSolve");
+	}
 }
