@@ -3,6 +3,12 @@ package com.github.vmarquet.graph.controler;
 import com.github.vmarquet.graph.model.*;
 import com.github.vmarquet.graph.view.*;
 import com.github.vmarquet.graph.physicalworld.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import java.awt.*;
 
 import java.util.*; // pour les math
@@ -11,7 +17,7 @@ import java.util.*; // pour les math
 // it's where all the calculation is made
 // "implements runnable" allows to create a thread
 
-public class SimulationControler implements Runnable {
+public class SimulationControler implements Runnable, ContactListener {
 
 	private final static int timeStep = 60;  // milliseconds
 	// when using timeStep during equations, timeStep should be in seconds
@@ -76,7 +82,7 @@ public class SimulationControler implements Runnable {
 				// Force de répulsion en 1/r avec r la distance entre les noeuds
 				// on parcours tous les noeuds
 				for (int i=0; i<model.getNumberOfNodes(); i++) {
-https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O9MQ
+
 					// on parcours tous les noeuds pas encore traités
 					for (int j=i+1; j<model.getNumberOfNodes(); j++) {
 
@@ -181,4 +187,21 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 		}
 		return;
 	}
+
+
+	//--- jBox2d events ---
+	/* Event when object are touching */
+	public void beginContact(Contact contact) {
+		System.out.println("Objects are touching "+Sprite.extractSprite(contact.getFixtureA().getBody()).getName()
+		+" "+Sprite.extractSprite(contact.getFixtureB().getBody()).getName() ); 
+	}
+
+	/* Event when object are leaving */
+	public void endContact(Contact contact) {
+		System.out.println("Objects are leaving "+Sprite.extractSprite(contact.getFixtureA().getBody()).getName() 
+	    +" "+Sprite.extractSprite(contact.getFixtureB().getBody()).getName() ); 
+	}
+	/* unused advanced stuff */
+	public void postSolve(Contact contact, ContactImpulse impulse) {}
+	public void preSolve(Contact contact, Manifold oldManifold) {}
 }

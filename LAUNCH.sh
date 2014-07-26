@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CLASSPATH_BLOB_GAME_COMPIL=".:./lib/*"
-CLASSPATH_BLOB_GAME_EXEC=:"./build:./lib/*"
+CLASSPATH_BLOB_GAME_EXEC="./build:./lib/*"
 
 NORMAL="\\033[0;39m"  # reset
 BLUE="\e[1;34m"

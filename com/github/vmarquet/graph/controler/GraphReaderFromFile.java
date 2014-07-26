@@ -25,13 +25,6 @@ public class GraphReaderFromFile {
 		// we get the instance of the model (singleton pattern)
 		this.model = SimulationModel.getInstance();
 
-		// we create the PhysicalWorld to store the objects of the simulation
-		// le premier arg est la force de gravité, donc on n'en met pas
-		// les 4 arg suivant sont la taille du monde
-		// (ATTENTION: il y a rapport 10: 64x72 = 640x720 pixels)
-		PhysicalWorld world = new PhysicalWorld(new Vec2(0,0), -640, 640, 0, 720, Color.WHITE);
-		model.setPhysicalWorld(world);
-
 		// we read the file containing nodes and links description
 		try {
 			Scanner scanner = new Scanner(new File(filename));
@@ -56,18 +49,6 @@ public class GraphReaderFromFile {
 				// (it's possible to override this after)
 				node.pos_x = Math.random();
 				node.pos_y = Math.random();
-
-				// we add a circle in the physical engine
-				try {
-					// paramètres: float radius, BodyType type, Vec2 position, float orientation, Sprite sprite
-					Body body = world.addCircularObject(10f, BodyType.STATIC, new Vec2(0,0), 0, 
-					          new Sprite("node"+Integer.toString(i), 1, Color.WHITE, null));
-					node.setBody(body);
-				}
-				catch (InvalidSpriteNameException ex) {
-					ex.printStackTrace();
-				}
-
 			}
 
 			while(scanner.hasNextLine()) {
@@ -133,5 +114,29 @@ public class GraphReaderFromFile {
 			ex.printStackTrace();
 		}
 
+		// we generate jBox2d world
+		this.generatePhysicalWorld();
+	}
+
+	private void generatePhysicalWorld() {
+		// we create the PhysicalWorld to store the objects of the simulation
+		// le premier arg est la force de gravité, donc on n'en met pas
+		// les 4 arg suivant sont la taille du monde (en pixels)
+		PhysicalWorld world = new PhysicalWorld(new Vec2(0,0), 0, 640, 0, 480, Color.WHITE);
+		this.model.setPhysicalWorld(world);
+
+		for (Node node : model.getNodes()) {
+			// we add a circle in the physical engine
+			try {
+				// paramètres: float radius, BodyType type, Vec2 position, float orientation, Sprite sprite
+				Body body = world.addCircularObject(10f, BodyType.STATIC, new Vec2(0,0), 0, 
+				          new Sprite("node"+Integer.toString(node.getNodeNumber()), 1, Color.WHITE, null));
+				// body.setSensor(true);
+				node.setBody(body);
+			}
+			catch (InvalidSpriteNameException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 }
