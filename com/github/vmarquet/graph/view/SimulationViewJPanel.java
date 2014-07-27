@@ -33,7 +33,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	
 	private boolean displayNumbers = false, displayNodes = false, displayShape = true; //booleans for the display (checkboxes) 
 	
-	private double zoomValue = 5.0; //valeur de l'échelle du zoom (1:1 --> 1:10)
+	private double zoomValue = 1.9; //valeur de l'échelle du zoom (1:1 --> 1:10)
 
 
 	public SimulationViewJPanel() {
@@ -77,7 +77,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		sliderZoom.setLabelTable( labelTable0 );
 		sliderZoom.setMajorTickSpacing(100); 
 		sliderZoom.setMinorTickSpacing(1);
-		sliderZoom.setValue(50); 
+		sliderZoom.setValue(19); 
 		sliderZoom.setPaintLabels(true);
 		sliderZoom.setPaintTicks(true);
 		this.add(sliderZoom);
