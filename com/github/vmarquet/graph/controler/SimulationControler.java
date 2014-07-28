@@ -5,6 +5,7 @@ import com.github.vmarquet.graph.view.*;
 import com.github.vmarquet.graph.physicalworld.*;
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.*;
 import org.jbox2d.collision.*;
 import org.jbox2d.collision.shapes.*;
 import org.jbox2d.dynamics.contacts.*;
@@ -33,6 +34,7 @@ public class SimulationControler implements Runnable, ContactListener {
 		this.model = SimulationModel.getInstance();
 		this.view = view;
 		this.world = this.model.getPhysicalWorld();
+		this.world.setContactListener(this);
 
 		// we convert the timestep to seconds
 		float timeStepJBox2d = (float)(this.timeStep)*0.001f;
