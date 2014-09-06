@@ -1,6 +1,7 @@
 package com.github.vmarquet.graph.view;
 
 import com.github.vmarquet.graph.model.*;
+import com.github.vmarquet.graph.physicalworld.*;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.JSlider; 
@@ -18,12 +19,27 @@ import java.awt.event.MouseListener;
 import java.awt.Point;
 import java.lang.*;
 import java.awt.geom.Path2D;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
+import java.awt.image.BufferedImage;
 
 
 public class SimulationViewJPanel extends JPanel implements SimulationView, MouseListener {
 
-      
-    private SimulationModel model = null;
+	private SimulationModel model = null;
+
+	// jbox2d stuff:
+	private float scale;
+	private PhysicalWorld world;
+	private Color backgroundColor;
+	private ImageIcon backgroundIcon;
+	private Vec2 cameraPosition;
+
+	private boolean display_jbox2d = false; // to know if we display jbox2d's panel or our panel
 
 	private double margin_x;
 	private double margin_y;
@@ -36,7 +52,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 	private double zoomValue = 1.9; //valeur de l'échelle du zoom (1:1 --> 1:10)
 
 
-	public SimulationViewJPanel() {
+	public SimulationViewJPanel(PhysicalWorld world, Dimension dimension, float scale) {
 		
 		//Button to center all nodes
 		JButton centerButton;
@@ -264,103 +280,158 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		});
 		this.add(shapeButton);
 		
+
 		// on récupère l'instance du modèle (pattern singleton)
 		this.model = SimulationModel.getInstance();
 
 		// pour récupérer les mouvements de la souris:
 		addMouseListener(this);
+
+		// jBox2d stuff:
+		this.world = world;
+		this.scale = scale;
+		this.backgroundColor = null;
+		this.backgroundIcon = null;
+		this.setPreferredSize(dimension);
+		// The cameraPosition in the simulation referential
+		this.cameraPosition = new Vec2(0,0);
 	}
 
 	public void updateDisplay() {
 		this.updateUI();
 		this.setGrabbedNodePosition();
+		this.setPhysicalPosition();
 	}
 	@Override
 	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+		Graphics2D g2d_tmp = (Graphics2D) g;
+		computeMargin(g2d_tmp);
 
-		// on caste l'objet Graphics en Graphics2D car plus de fonctionnalités
-		Graphics2D g2d = (Graphics2D) g;
-		// si on veut de l'antialiasing (ATTENTION ça fait ramer un max quand beaucoupd de noeuds)
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		// we clear the background
-		Color backgroundColor = Color.decode("#000000");
-		this.setBackground(backgroundColor);
+		if (display_jbox2d == false) {
+			super.paintComponent(g);
 
-		// we compute the ratio for the display
-		computeMargin(g2d);
+			// on caste l'objet Graphics en Graphics2D car plus de fonctionnalités
+			Graphics2D g2d = (Graphics2D) g;
+			// si on veut de l'antialiasing (ATTENTION ça fait ramer un max quand beaucoupd de noeuds)
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		// check if there is a possibility to link the graphs
-		// for each combinaison of nodes 
-		for (Node i : model.getNodes()){
-			for (Node j : model.getNodes()){
-				//if they don't belong to the same graph
-				if(i.getGraphNumber() != j.getGraphNumber()) {
-					double distX = convertNodePositionToPixelX(i) - convertNodePositionToPixelX(j);
-					double distY = convertNodePositionToPixelY(i) - convertNodePositionToPixelY(j);
-					// Get distance with Pythagoras
-					double dist = Math.sqrt((distX * distX) + (distY * distY));
-					// if these links are close enougth
-					if( dist <= (convertNodeDiameterToPixel(i)/0.8 + convertNodeDiameterToPixel(j)/0.8) ){
-						// we get 2 nodes i_ and j_ that are close from each graph (linked to the i and j nodes)
-						int i_Number=-1, j_Number=-1;
-						// getting a node i_ near i
-						for (Node i_ : model.getNodes()){	
-							if(model.isLinked(i_, i) == true){
-								i_Number = i_.getNodeNumber();
+			// we clear the background
+			Color backgroundColor = Color.decode("#000000");
+			this.setBackground(backgroundColor);
+
+			// we compute the ratio for the display
+			computeMargin(g2d);
+
+			// check if there is a possibility to link the graphs
+			// for each combinaison of nodes 
+			for (Node i : model.getNodes()){
+				for (Node j : model.getNodes()){
+					//if they don't belong to the same graph
+					if(i.getGraphNumber() != j.getGraphNumber()) {
+						double distX = convertNodePositionToPixelX(i) - convertNodePositionToPixelX(j);
+						double distY = convertNodePositionToPixelY(i) - convertNodePositionToPixelY(j);
+						// Get distance with Pythagoras
+						double dist = Math.sqrt((distX * distX) + (distY * distY));
+						// if these links are close enougth
+						if( dist <= (convertNodeDiameterToPixel(i)/0.8 + convertNodeDiameterToPixel(j)/0.8) ){
+							// we get 2 nodes i_ and j_ that are close from each graph (linked to the i and j nodes)
+							int i_Number=-1, j_Number=-1;
+							// getting a node i_ near i
+							for (Node i_ : model.getNodes()){	
+								if(model.isLinked(i_, i) == true){
+									i_Number = i_.getNodeNumber();
+								}
 							}
-						}
-						// getting a node j_ near j
-						for (Node j_ : model.getNodes()){
-							
-							if(model.isLinked(j_, j) == true){
-								j_Number = j_.getNodeNumber();
+							// getting a node j_ near j
+							for (Node j_ : model.getNodes()){
+								
+								if(model.isLinked(j_, j) == true){
+									j_Number = j_.getNodeNumber();
+								}
 							}
-						}
-					
-						// we link i j and i_ j_ with a special link
-						Link link1 = new Link(i.getNodeNumber(), j.getNodeNumber());
-						link1.setLength(0.0025);
-						link1.setRigidity(80.0);
-						this.model.addLink(link1);
-						Link link2 = new Link(i_Number, j_Number);
-						link2.setLength(0.0025);
-						link2.setRigidity(80.0);
-						this.model.addLink(link2);
 						
-						//the two graphs have to be only one graph
-						int graphToKeep = i.getGraphNumber();
-						int graphToErase = j.getGraphNumber();
-						for (Node node : model.getNodes()){
-							if(node.getGraphNumber() == graphToErase){
-								node.setGraphNumber(graphToKeep);
+							// we link i j and i_ j_ with a special link
+							Link link1 = new Link(i.getNodeNumber(), j.getNodeNumber());
+							link1.setLength(0.0025);
+							link1.setRigidity(80.0);
+							this.model.addLink(link1);
+							Link link2 = new Link(i_Number, j_Number);
+							link2.setLength(0.0025);
+							link2.setRigidity(80.0);
+							this.model.addLink(link2);
+							
+							//the two graphs have to be only one graph
+							int graphToKeep = i.getGraphNumber();
+							int graphToErase = j.getGraphNumber();
+							for (Node node : model.getNodes()){
+								if(node.getGraphNumber() == graphToErase){
+									node.setGraphNumber(graphToKeep);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		
-		int [] pentagon = {0,1,2,3,4};
-		int [] triangle = {5,6,7};
-		int [] square = {8,9,10,11};
-		int [] shapePart1 = {12,13,14};
-		int [] shapePart2 = {12,14,15};
-		int [] shapePart3 = {12,15,16,17};
+			
+			int [] pentagon = {0,1,2,3,4};
+			int [] triangle = {5,6,7};
+			int [] square = {8,9,10,11};
+			int [] shapePart1 = {12,13,14};
+			int [] shapePart2 = {12,14,15};
+			int [] shapePart3 = {12,15,16,17};
 
-		// we paint the objects
-		if(displayShape == true) {
-			paintShape(g2d,pentagon);
-			paintShape(g2d,triangle);
-			paintShape(g2d,square);
-			paintShape(g2d,shapePart1);
-			paintShape(g2d,shapePart2);
-			paintShape(g2d,shapePart3);
+			// we paint the objects
+			if(displayShape == true) {
+				paintShape(g2d,pentagon);
+				paintShape(g2d,triangle);
+				paintShape(g2d,square);
+				paintShape(g2d,shapePart1);
+				paintShape(g2d,shapePart2);
+				paintShape(g2d,shapePart3);
+			}
+			paintLinks(g2d);
+			if(displayNodes == true) paintNodes(g2d);
+			if(displayNumbers == true) paintNumbers(g2d);
 		}
-		paintLinks(g2d);
-		if(displayNodes == true) paintNodes(g2d);
-		if(displayNumbers == true) paintNumbers(g2d);
+		else if (display_jbox2d == true) {
+
+			/* Painting the whole world in the buffer image */
+
+			// The buffer is an image containing the painting of the whole world
+			// The painting of the SimulationViewJBox2D will be a crop of this image, centered around the camera
+			BufferedImage buffer = new BufferedImage(toScale(world.getWidth()), toScale(world.getHeight()), BufferedImage.TYPE_INT_RGB);
+
+			// Get the Graphics context from the image (different from the Graphics context from the JPanel)
+			Graphics imageGraphics = buffer.getGraphics();
+			// Clear the image
+			imageGraphics.clearRect(0, 0, buffer.getWidth(), buffer.getHeight());
+			// Fill background with color
+			if(backgroundColor!=null) {
+				imageGraphics.setColor(backgroundColor);
+				imageGraphics.fillRect(0,0, buffer.getWidth(), buffer.getHeight());
+			}
+			// Paint the background image (the image is scaled to fit the PhysicalWorld dimension)
+			if(backgroundIcon != null) {
+				Sprite.rotatedPaint(imageGraphics, backgroundIcon, 0, 0 , 
+					((float)buffer.getWidth())/backgroundIcon.getIconWidth(), 
+					((float)buffer.getHeight())/backgroundIcon.getIconHeight(), 0, 0, 0);
+			}
+			// If the SimulationViewJBox2D is linked to a PhysicalWorld
+			if(world != null) {
+				 world.paint(imageGraphics, this);
+				 // world.paint appelle Sprite.paint() sur tous les sprites du tableau de sprites
+			}
+
+			/* Painting the JPanel as a crop from the buffer image */
+			// Clear the JPanel
+			g.clearRect(0, 0, getWidth(), getHeight());
+			// Get the camera's coordinate in JPanel referential
+			Point cam = convert4draw(cameraPosition);
+			// Center the JPanel on the camera and print the buffer image in the JPanel
+			g.drawImage(buffer, this.getWidth()/2 - cam.x, this.getHeight()/2 -cam.y , null);
+
+		}
 	}
 	
 	private void paintNodes(Graphics2D g) {
@@ -580,4 +651,62 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		this.grabbedNode.setPosition(x,y);
 
 	}
+
+
+	/**
+	* Set the camera position (in the simulation referential)
+	* @param cameraPosition the cameraPosition (in the simulation referential)
+	*/
+	public void setCameraPosition(Vec2 cameraPosition) {
+		this.cameraPosition.set(cameraPosition);
+	}
+	
+	/**
+	* Set the background color
+	* @param backgroundColor the new Color for the background
+	*/
+	public void setBackGroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+	
+	/**
+	* Set the background image
+	* @param backgroundIcon the new ImageIcon for the background
+	*/
+	public void setBackGroundIcon(ImageIcon backgroundIcon) {
+		this.backgroundIcon = backgroundIcon;
+	}
+	
+	/**
+	* Convert a simulation's size into pixel'size
+	* @param value the value in the simulation
+	* @return the value in pixel
+	*/
+	public int toScale(float value) {
+		return Math.round(value*scale);
+	}
+	
+	/**
+	* Convert simulation coordinate (Origin centered, Positive ordinate up) into JPanel coordinate (Top-left origin, Positive ordinate down)
+	* @param v a Vec2 vector coordinate in simulation referential
+	* @return a Point vector in JPanel referential
+	*/
+	public Point convert4draw(Vec2 v) { // Change orientation of the referentiel and put to scale
+		return  new Point(toScale(v.x - world.getXMin()), toScale(world.getYMax() - (v.y)));
+	}
+
+	// we set jbox2d nodes at the same position than the node of the simulation
+	private void setPhysicalPosition() {
+		// ATTENTION: l'axe des y est inversé sur jbox2d par rapport aux JPanels
+		// (pour les JPanels, l'axe des Y est croissant vers le bas, et c'est l'inverse pour jBox2d)
+		int height = (int)model.getPhysicalWorld().getHeight();
+
+		for (Node node : model.getNodes()) {
+			Body body = node.getBody();
+			float x = (float)convertNodePositionToPixelX(node);
+			float y = height-(float)convertNodePositionToPixelY(node);
+			body.setTransform(new Vec2(x,y), 0);
+		}
+	}
+
 }

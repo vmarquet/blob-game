@@ -2,6 +2,7 @@ package com.github.vmarquet.graph.model;
 
 import java.util.*; // pour les math
 import com.github.vmarquet.graph.model.*;
+import com.github.vmarquet.graph.physicalworld.*;
 
 public class SimulationModel {  // singleton pattern
 
@@ -12,6 +13,12 @@ public class SimulationModel {  // singleton pattern
 	// physic simulation:
 	private double lambda = 3.0;   // constante de frottements
 	private double coef_repulsion = 0.5;  // constante de répulsion
+	private double length = 0.1;  // longueur au repos
+	private double rigidity = 50.0;  // constante de raideur
+
+	// jbox2d stuff:
+	private PhysicalWorld world = null;
+
 
 	private SimulationModel() {
 		this.nodes = new ArrayList<Node>();
@@ -60,6 +67,15 @@ public class SimulationModel {  // singleton pattern
 	public double getCoefRepulsion() {
 		return this.coef_repulsion;
 	}
+	public double getLength() {
+		return this.length;
+	}
+	public double getRigidity() {
+		return this.rigidity;
+	}
+	public PhysicalWorld getPhysicalWorld() {
+		return this.world;
+	}
 
 	// setters:
 	public void setNodePosition(int number, double X, double Y) {
@@ -71,6 +87,9 @@ public class SimulationModel {  // singleton pattern
 	}
 	public void setLambda(double newLambda){
 		this.lambda = newLambda;
+	}
+	public void setPhysicalWorld(PhysicalWorld world) {
+		this.world = world;
 	}
 
 	// to know if two nodes are linked

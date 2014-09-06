@@ -3,8 +3,16 @@ package com.github.vmarquet.graph.controler;
 import com.github.vmarquet.graph.model.SimulationModel;
 import com.github.vmarquet.graph.model.Node;
 import com.github.vmarquet.graph.model.Link;
+import com.github.vmarquet.graph.physicalworld.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import java.io.*;
 import java.util.Scanner;
+import java.awt.Color;
 
 public class GraphReaderFromFile {
 
@@ -106,5 +114,29 @@ public class GraphReaderFromFile {
 			ex.printStackTrace();
 		}
 
+		// we generate jBox2d world
+		this.generatePhysicalWorld();
+	}
+
+	private void generatePhysicalWorld() {
+		// we create the PhysicalWorld to store the objects of the simulation
+		// le premier arg est la force de gravité, donc on n'en met pas
+		// les 4 arg suivant sont la taille du monde (en pixels)
+		PhysicalWorld world = new PhysicalWorld(new Vec2(0,0), 0, 640, 0, 480, Color.WHITE);
+		this.model.setPhysicalWorld(world);
+
+		for (Node node : model.getNodes()) {
+			// we add a circle in the physical engine
+			try {
+				// paramètres: float radius, BodyType type, Vec2 position, float orientation, Sprite sprite
+				Body body = world.addCircularObject(10f, BodyType.STATIC, new Vec2(0,0), 0, 
+				          new Sprite("node"+Integer.toString(node.getNodeNumber()), 1, Color.WHITE, null));
+				body.getFixtureList().setSensor(false);
+				node.setBody(body);
+			}
+			catch (InvalidSpriteNameException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 }

@@ -1,5 +1,11 @@
 package com.github.vmarquet.graph.model;
 
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import java.awt.Color;
 
 public class Node {
@@ -26,6 +32,7 @@ public class Node {
 	private boolean hung = false;  // when set to true, the node cannot move
 	private boolean grabbed = false;  // to know if the node has been grabbed by the mouse
 
+	private Body body = null;
 
 	// constructors:
 	// if node number < 0, automatic numerotation
@@ -81,6 +88,9 @@ public class Node {
 	public void setGraphNumber(int newGraphNumber) {
 		this.graphNumber = newGraphNumber;
 	}
+	public void setBody(Body body) {
+		this.body = body;
+	}
 
 	// getters:
 	public int getNodeNumber() {
@@ -97,5 +107,8 @@ public class Node {
 	}
 	public int getGraphNumber() {
 		return this.graphNumber;
+	}
+	public Body getBody() {
+		return this.body;
 	}
 }

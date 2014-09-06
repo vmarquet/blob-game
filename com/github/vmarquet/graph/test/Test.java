@@ -7,9 +7,18 @@ import com.github.vmarquet.graph.view.SimulationView;
 import com.github.vmarquet.graph.view.SimulationViewJPanel;
 import com.github.vmarquet.graph.controler.GraphReaderFromFile;
 import com.github.vmarquet.graph.controler.SimulationControler;
+import com.github.vmarquet.graph.physicalworld.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import javax.swing.JFrame;
 import java.lang.Thread;
 import javax.swing.WindowConstants;
+import java.awt.Dimension;
+import java.awt.Color;
 
 public class Test {
 
@@ -22,14 +31,23 @@ public class Test {
 		model.print();
 
 		// on crée une vue pour la simulation
-		SimulationViewJPanel panel = new SimulationViewJPanel();
+
+		// we get the size of jBox2d world
+		int width  = (int)model.getPhysicalWorld().getWidth();
+		int height = (int)model.getPhysicalWorld().getHeight();
+
+		// we create the panel
+		SimulationViewJPanel panel = new SimulationViewJPanel(model.getPhysicalWorld(), new Dimension(width,height),1f);
+
+		// we create a window and we put the panel in it
 		JFrame fen = new JFrame();
-		fen.setSize(640,480);
+		fen.setSize(width,height);
 		//fen.setResizable(false);
 		fen.add(panel);
 		fen.setVisible(true);
 		fen.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		panel.requestFocus();
+		panel.setCameraPosition(new Vec2(width/2,height/2));  // jbox2d
 
 		// on lance la simulation
 		Thread thread = new Thread(new SimulationControler(panel));

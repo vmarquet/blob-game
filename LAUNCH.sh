@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CLASSPATH_BLOB_GAME_COMPIL=".:./lib/*"
+CLASSPATH_BLOB_GAME_EXEC="./build:./lib/*"
+
 NORMAL="\\033[0;39m"  # reset
 BLUE="\e[1;34m"
 
@@ -9,13 +12,13 @@ if [[ ! -d build ]]; then
 fi
 
 # compilation
-COMPIL="javac -cp . com/github/vmarquet/graph/*/*.java -d build"
+COMPIL="javac -cp $CLASSPATH_BLOB_GAME_COMPIL com/github/vmarquet/graph/*/*.java -d build"
 echo -e "${BLUE}$COMPIL${NORMAL}"
 eval "$COMPIL"
 
 # we check if compilation was successful, and if yes, we launch the program
 if [[ $? -eq 0 ]]; then
-	EXEC="java -cp ./build com.github.vmarquet.graph.test.Test"
+	EXEC="java -cp $CLASSPATH_BLOB_GAME_EXEC com.github.vmarquet.graph.test.Test"
 	echo -e "${BLUE}$EXEC${NORMAL}"
 	eval "$EXEC"
 fi

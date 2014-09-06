@@ -2,6 +2,14 @@ package com.github.vmarquet.graph.controler;
 
 import com.github.vmarquet.graph.model.*;
 import com.github.vmarquet.graph.view.*;
+import com.github.vmarquet.graph.physicalworld.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.callbacks.*;
 import java.awt.*;
 
 import java.util.*; // pour les math
@@ -10,7 +18,7 @@ import java.util.*; // pour les math
 // it's where all the calculation is made
 // "implements runnable" allows to create a thread
 
-public class SimulationControler implements Runnable {
+public class SimulationControler implements Runnable, ContactListener {
 
 	private final static int timeStep = 60;  // milliseconds
 	// when using timeStep during equations, timeStep should be in seconds
@@ -19,11 +27,19 @@ public class SimulationControler implements Runnable {
 
 	private SimulationModel model = null;
 	private SimulationView view = null;
+	private PhysicalWorld world = null;
 
 	public SimulationControler(SimulationView view) {
 		// we get the instance of the model (singleton pattern)
 		this.model = SimulationModel.getInstance();
 		this.view = view;
+		this.world = this.model.getPhysicalWorld();
+		this.world.setContactListener(this);
+
+		// we convert the timestep to seconds
+		float timeStepJBox2d = (float)(this.timeStep)*0.001f;
+		// we set the timestep for jBox2d
+		this.world.setTimeStep(timeStep);
 	}
 
 	// threaded function, the heart of the physics simulation
@@ -68,7 +84,7 @@ public class SimulationControler implements Runnable {
 				// Force de répulsion en 1/r avec r la distance entre les noeuds
 				// on parcours tous les noeuds
 				for (int i=0; i<model.getNumberOfNodes(); i++) {
-https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O9MQ
+
 					// on parcours tous les noeuds pas encore traités
 					for (int j=i+1; j<model.getNumberOfNodes(); j++) {
 
@@ -93,7 +109,7 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 					}
 				}
 
-				// force de frottement https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O9MQfluide: f = -lambda*v
+				// force de frottement fluide: f = -lambda*v
 				double lambda = model.getLambda();
 				for (Node node : model.getNodes()) {
 					node.for_x += -lambda*node.vit_x;
@@ -164,12 +180,34 @@ https://www.youtube.com/watch?v=pt_feAZ8rSM&index=120&list=LLyiyQp1p8yM5iZTO2X_O
 				// }
 
 				view.updateDisplay();
-				Thread.sleep(50);  // Synchronize the simulation with real time
+				this.world.step();  // jBox2d mouvements
+				Thread.sleep(timeStep);  // Synchronize the simulation with real time
 			}
 		}
 		catch(InterruptedException ex) {
 			System.err.println(ex.getMessage());
 		}
 		return;
+	}
+
+
+	//--- jBox2d events ---
+	/* Event when object are touching */
+	public void beginContact(Contact contact) {
+		System.out.println("Objects are touching "+Sprite.extractSprite(contact.getFixtureA().getBody()).getName()
+		+" "+Sprite.extractSprite(contact.getFixtureB().getBody()).getName() ); 
+	}
+
+	/* Event when object are leaving */
+	public void endContact(Contact contact) {
+		System.out.println("Objects are leaving "+Sprite.extractSprite(contact.getFixtureA().getBody()).getName() 
+	    +" "+Sprite.extractSprite(contact.getFixtureB().getBody()).getName() ); 
+	}
+	/* unused advanced stuff */
+	public void postSolve(Contact contact, ContactImpulse impulse) {
+		System.out.println("Contact: postSove");
+	}
+	public void preSolve(Contact contact, Manifold oldManifold) {
+		System.out.println("Contact: preSolve");
 	}
 }
