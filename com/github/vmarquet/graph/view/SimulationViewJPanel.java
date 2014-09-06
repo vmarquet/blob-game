@@ -61,7 +61,7 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
 		JSlider sliderZoom, sliderLinkLength, sliderLinkRigidity, sliderRepulsionConstant, sliderLambda, sliderNodeMass;
         
         //Checkboxes for displaying numbers, nodes and/or shape
-        final JCheckBox numberButton, nodesButton, shapeButton;
+        final JCheckBox numberButton, nodesButton, shapeButton, jbox2dButton;
         
         
         //Button to center all nodes
@@ -279,6 +279,27 @@ public class SimulationViewJPanel extends JPanel implements SimulationView, Mous
    			}
 		});
 		this.add(shapeButton);
+
+		//checkbox for jbox2d display
+		jbox2dButton = new JCheckBox("JBox2D display");
+		jbox2dButton.setSelected(false);
+		jbox2dButton.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				display_jbox2d = false;
+				
+				Object source = e.getItemSelectable();
+
+				if (source == jbox2dButton) {
+					display_jbox2d = true;
+
+					if (e.getStateChange() == ItemEvent.DESELECTED) {
+						display_jbox2d = false;
+					}
+				}
+			}
+		});
+		this.add(jbox2dButton);
+
 		
 
 		// on récupère l'instance du modèle (pattern singleton)
